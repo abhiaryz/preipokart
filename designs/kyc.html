@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Automated KYC &amp; Onboarding - ROMER ALPHA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#e1e2eb",
+                        "secondary-container": "#00f4b3",
+                        "tertiary-container": "#6a6c74",
+                        "on-surface-variant": "#c3c5d9",
+                        "outline-variant": "#434656",
+                        "surface": "#111318",
+                        "on-tertiary-fixed": "#191c22",
+                        "inverse-surface": "#e2e2e8",
+                        "on-primary-fixed": "#001550",
+                        "on-background": "#e2e2e8",
+                        "surface-container-high": "#282a2e",
+                        "outline": "#8d90a2",
+                        "on-secondary": "#003826",
+                        "surface-container-lowest": "#0c0e12",
+                        "on-secondary-fixed-variant": "#005139",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2f3035",
+                        "background": "#111318",
+                        "on-tertiary-container": "#edeef7",
+                        "surface-bright": "#37393e",
+                        "primary-fixed": "#dce1ff",
+                        "surface-container": "#1e2024",
+                        "secondary-fixed-dim": "#00e1a5",
+                        "on-secondary-container": "#006b4c",
+                        "primary": "#b6c4ff",
+                        "surface-variant": "#333539",
+                        "secondary": "#ccffe5",
+                        "on-secondary-fixed": "#002115",
+                        "on-surface": "#e2e2e8",
+                        "surface-tint": "#b6c4ff",
+                        "on-primary-container": "#edeeff",
+                        "on-primary": "#00277f",
+                        "surface-container-low": "#1a1c20",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#3effbf",
+                        "error-container": "#93000a",
+                        "tertiary": "#c4c6cf",
+                        "on-primary-fixed-variant": "#003ab2",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "primary-container": "#1a5cff",
+                        "tertiary-fixed-dim": "#c4c6cf",
+                        "surface-container-highest": "#333539",
+                        "on-tertiary-fixed-variant": "#44474e",
+                        "on-error": "#690005",
+                        "on-tertiary": "#2d3037",
+                        "inverse-primary": "#004ee8",
+                        "surface-dim": "#111318",
+                        "electric-mint": "#2AFFBD" /* Custom addition for request */
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "unit": "4px",
+                        "widget-gap": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "data-md": ["JetBrains Mono"],
+                        "body-md": ["Inter Tight"],
+                        "body-lg": ["Inter Tight"],
+                        "headline-sm": ["Inter Tight"],
+                        "display-lg": ["Inter Tight"],
+                        "data-lg": ["JetBrains Mono"],
+                        "headline-md": ["Inter Tight"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "data-md": ["14px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-sm": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "data-lg": ["20px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "headline-md": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Neo-Skeuomorphic Modernism specific utilities */
+        .glass-panel {
+            background-color: rgba(22, 25, 32, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .widget-panel {
+            background-color: #0F1218;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        .inset-input {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-cobalt {
+            background: linear-gradient(180deg, rgba(26, 92, 255, 0.9) 0%, rgba(0, 58, 178, 0.9) 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(26, 92, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cobalt:hover {
+            box-shadow: 0 6px 20px rgba(26, 92, 255, 0.4);
+        }
+
+        /* Biometric Scanner Animation */
+        @keyframes scan {
+            0% { transform: translateY(-50%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(50%); opacity: 0; }
+        }
+        .scanner-line {
+            animation: scan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Suppressed Shell Navigations for Onboarding/Transactional screen as per Mandate -->
+<!-- Brand Anchor Header (Minimal for onboarding) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.4)] flex justify-center items-center h-20 px-margin-desktop w-full max-w-full">
+<div class="font-display-lg text-display-lg font-bold text-primary tracking-tighter">ROMER ALPHA</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-32 pb-margin-desktop px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto min-h-screen flex flex-col gap-gutter">
+<!-- Progress Indicator -->
+<div class="w-full max-w-3xl mx-auto mb-8">
+<div class="flex justify-between items-center relative z-10">
+<!-- Step 1: Completed -->
+<div class="flex flex-col items-center gap-2 relative z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-outline-variant flex items-center justify-center text-secondary-fixed shadow-[0_0_15px_rgba(42,255,189,0.2)] transition-colors duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Identity</span>
+</div>
+<!-- Step 2: Active -->
+<div class="flex flex-col items-center gap-2 relative z-10">
+<div class="w-10 h-10 rounded-full bg-primary-container border-2 border-primary border-t-white/20 flex items-center justify-center shadow-[0_0_20px_rgba(26,92,255,0.4)]">
+<span class="font-data-md text-data-md text-on-primary-container">02</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary">Biometrics</span>
+</div>
+<!-- Step 3: Pending -->
+<div class="flex flex-col items-center gap-2 relative z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center text-on-surface-variant opacity-50">
+<span class="font-data-md text-data-md">03</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-50">Suitability</span>
+</div>
+<!-- Step 4: Pending -->
+<div class="flex flex-col items-center gap-2 relative z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center text-on-surface-variant opacity-50">
+<span class="font-data-md text-data-md">04</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-50">Review</span>
+</div>
+</div>
+<!-- Progress Line -->
+<div class="relative -mt-[44px] mb-8 h-[2px] bg-outline-variant/30 w-[calc(100%-3rem)] mx-auto z-0">
+<div class="absolute top-0 left-0 h-full bg-primary shadow-[0_0_10px_rgba(182,196,255,0.5)] transition-all duration-500 w-1/3"></div>
+</div>
+</div>
+<!-- 
+            Bento Grid Layout 
+            Mobile: Stack, Desktop: 12-column grid 
+        -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-widget-gap">
+<!-- Biometric Liveness Check (Left Column, span 5) -->
+<section class="md:col-span-5 widget-panel rounded-xl p-gutter flex flex-col gap-6 relative overflow-hidden">
+<header class="flex justify-between items-center border-b border-white/5 pb-4">
+<h2 class="font-label-caps text-label-caps text-on-surface">LIVENESS VERIFICATION</h2>
+<span class="material-symbols-outlined text-outline">face</span>
+</header>
+<div class="flex-grow flex flex-col items-center justify-center gap-8 py-8 relative">
+<!-- Scanner UI Placeholder -->
+<div class="relative w-64 h-64 flex items-center justify-center">
+<!-- Outer Rings -->
+<div class="absolute inset-0 rounded-full border border-outline-variant/30 animate-[spin_10s_linear_infinite]"></div>
+<div class="absolute inset-4 rounded-full border-2 border-primary border-dashed opacity-50 animate-[spin_15s_linear_infinite_reverse]"></div>
+<!-- Camera Feed Placeholder Image -->
+<div class="absolute inset-8 rounded-full overflow-hidden bg-surface-container-lowest inset-input relative">
+<img class="w-full h-full object-cover opacity-80 mix-blend-luminosity" data-alt="A futuristic, monochromatic portrait of a sophisticated person looking directly at the camera, styled with high-contrast cinematic lighting and subtle cyberpunk or techno-thriller undertones. The background is pure black, emphasizing the subject's face which is illuminated by a soft, cool rim light, fitting a high-end financial or security platform interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgXKikxFTN0SiGyADgps_-N8eaaAAySbYLk2Iz6oC6aRoVIMzE18GxSrsyXiSYxRilH0cdPk5YX7ST7kEczO-FXiqTbsXjKlnc6A1UvxbCtg2UwdqmS5T832paLYBFI_W9rZvtirwY9En3sgiCCcZk-WvPQ-61EVKIVLsugc2qGZ8EGosNYkWjR3VZ0SRx7vvMXfjMzEW3sQ6IwkTIZIJh19_MnQ0ghrX9SNcZiWuZcZ5m73WgQ0OkgQ"/>
+<!-- Scanning Overlay -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent scanner-line"></div>
+<!-- Reticle marks -->
+<div class="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-primary"></div>
+<div class="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-primary"></div>
+<div class="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-primary"></div>
+<div class="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-primary"></div>
+</div>
+</div>
+<div class="text-center space-y-2">
+<p class="font-headline-sm text-headline-sm text-on-surface">Position your face</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Ensure good lighting and remain still.</p>
+</div>
+</div>
+<div class="mt-auto">
+<button class="w-full py-4 rounded-lg btn-cobalt font-data-md text-data-md text-on-primary-container tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-transform">
+                        INITIATE SCAN
+                    </button>
+</div>
+</section>
+<!-- Investor Suitability Quiz (Right Column, span 7) -->
+<section class="md:col-span-7 glass-panel rounded-xl p-gutter flex flex-col gap-6">
+<header class="flex justify-between items-center border-b border-white/5 pb-4">
+<h2 class="font-label-caps text-label-caps text-on-surface">SUITABILITY ASSESSMENT</h2>
+<span class="font-data-md text-data-md text-on-surface-variant">Q2/5</span>
+</header>
+<div class="space-y-8 flex-grow">
+<div class="space-y-4">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">What is your primary investment objective for private, unlisted equities?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Select the strategy that best aligns with your institutional mandate or personal wealth goals.</p>
+</div>
+<!-- Multiple Choice Options -->
+<div class="space-y-4">
+<!-- Option 1: Selected state example -->
+<label class="group relative flex items-center p-4 rounded-lg border border-primary/50 bg-primary/5 cursor-pointer transition-all duration-200 hover:bg-surface-bright/20">
+<input checked="" class="peer sr-only" name="objective" type="radio"/>
+<div class="w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center mr-4">
+<div class="w-2 h-2 rounded-full bg-on-primary-container"></div>
+</div>
+<div class="flex-grow">
+<span class="font-data-md text-data-md text-on-surface block mb-1">Capital Preservation &amp; Yield</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Focus on stable returns with minimal drawdown risk.</span>
+</div>
+<div class="absolute inset-0 rounded-lg shadow-[inset_0_0_15px_rgba(26,92,255,0.1)] pointer-events-none"></div>
+</label>
+<!-- Option 2: Default state -->
+<label class="group relative flex items-center p-4 rounded-lg border border-outline-variant/30 bg-surface-container-low cursor-pointer transition-all duration-200 hover:border-outline hover:bg-surface-container-highest">
+<input class="peer sr-only" name="objective" type="radio"/>
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant bg-transparent flex items-center justify-center mr-4 group-hover:border-outline">
+<div class="w-2 h-2 rounded-full bg-transparent"></div>
+</div>
+<div class="flex-grow">
+<span class="font-data-md text-data-md text-on-surface block mb-1">Balanced Growth</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Moderate risk appetite targeting long-term capital appreciation.</span>
+</div>
+</label>
+<!-- Option 3: Default state -->
+<label class="group relative flex items-center p-4 rounded-lg border border-outline-variant/30 bg-surface-container-low cursor-pointer transition-all duration-200 hover:border-outline hover:bg-surface-container-highest">
+<input class="peer sr-only" name="objective" type="radio"/>
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant bg-transparent flex items-center justify-center mr-4 group-hover:border-outline">
+<div class="w-2 h-2 rounded-full bg-transparent"></div>
+</div>
+<div class="flex-grow">
+<span class="font-data-md text-data-md text-on-surface block mb-1">Aggressive Expansion</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">High risk tolerance seeking maximum alpha through pre-IPO exposure.</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="flex justify-between items-center mt-auto pt-6 border-t border-white/5">
+<button class="px-6 py-3 rounded-lg bg-transparent text-on-surface-variant font-data-md text-data-md hover:text-on-surface transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+                        PREVIOUS
+                    </button>
+<button class="px-8 py-3 rounded-lg bg-surface-bright text-on-surface font-data-md text-data-md hover:bg-surface-variant border border-outline-variant/50 transition-all shadow-md flex items-center gap-2 group">
+                        CONTINUE
+                        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</section>
+</div>
+</main>
+</body></html>

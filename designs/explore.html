@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Romer Alpha - Institutional Access to India's Unicorns</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#003ab2",
+                        "surface": "#111318",
+                        "tertiary": "#c4c6cf",
+                        "outline": "#8d90a2",
+                        "on-tertiary-fixed": "#191c22",
+                        "on-secondary-container": "#006b4c",
+                        "on-primary-container": "#edeeff",
+                        "inverse-surface": "#e2e2e8",
+                        "on-secondary-fixed-variant": "#005139",
+                        "on-background": "#e2e2e8",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#edeef7",
+                        "secondary": "#ccffe5",
+                        "on-tertiary": "#2d3037",
+                        "on-secondary": "#003826",
+                        "on-surface-variant": "#c3c5d9",
+                        "on-secondary-fixed": "#002115",
+                        "background": "#111318",
+                        "surface-container-lowest": "#0c0e12",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#44474e",
+                        "surface-container": "#1e2024",
+                        "tertiary-fixed": "#e1e2eb",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "surface-dim": "#111318",
+                        "on-primary": "#00277f",
+                        "on-surface": "#e2e2e8",
+                        "tertiary-fixed-dim": "#c4c6cf",
+                        "tertiary-container": "#6a6c74",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#434656",
+                        "surface-container-highest": "#333539",
+                        "surface-variant": "#333539",
+                        "secondary-fixed": "#3effbf",
+                        "primary-fixed": "#dce1ff",
+                        "surface-bright": "#37393e",
+                        "secondary-fixed-dim": "#00e1a5",
+                        "inverse-primary": "#004ee8",
+                        "secondary-container": "#00f4b3",
+                        "primary-container": "#1a5cff",
+                        "surface-tint": "#b6c4ff",
+                        "surface-container-low": "#1a1c20",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#2f3035",
+                        "on-primary-fixed": "#001550",
+                        "surface-container-high": "#282a2e",
+                        "primary": "#b6c4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "widget-gap": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter Tight"],
+                        "label-caps": ["JetBrains Mono"],
+                        "display-lg": ["Inter Tight"],
+                        "headline-md": ["Inter Tight"],
+                        "data-lg": ["JetBrains Mono"],
+                        "body-md": ["Inter Tight"],
+                        "headline-sm": ["Inter Tight"],
+                        "data-md": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-md": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "data-lg": ["20px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-sm": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "data-md": ["14px", { "lineHeight": "1.4", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .widget-layer {
+            background-color: #0F1218;
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 12px 24px -4px rgba(0, 0, 0, 0.2);
+        }
+        .glass-layer {
+            backdrop-filter: blur(20px);
+            background-color: rgba(22, 25, 32, 0.8);
+        }
+        .btn-primary {
+            background: linear-gradient(180deg, #1a5cff 0%, #004ee8 100%);
+            box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.2), 0 4px 12px rgba(26, 92, 255, 0.3);
+        }
+        .btn-primary:hover {
+            box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.3), 0 6px 16px rgba(26, 92, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body-md min-h-screen flex flex-col pt-20 selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="bg-surface/80 dark:bg-surface/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+<div class="flex justify-between items-center h-20 px-margin-desktop max-w-full mx-auto">
+<div class="font-display-lg text-headline-sm tracking-tighter text-primary">Romer Alpha</div>
+<div class="hidden md:flex gap-gutter items-center">
+<a class="text-primary border-b-2 border-primary pb-1 font-body-md text-body-md active:scale-95 transition-transform" href="#">Explore</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 font-body-md text-body-md px-3 py-2 rounded-lg active:scale-95" href="#">Portfolio</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 font-body-md text-body-md px-3 py-2 rounded-lg active:scale-95" href="#">Analytics</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 font-body-md text-body-md px-3 py-2 rounded-lg active:scale-95" href="#">Compliance</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 font-body-md text-body-md px-3 py-2 rounded-lg active:scale-95" href="#">Insights</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="btn-primary text-white font-body-md text-body-md px-6 py-2 rounded-lg transition-all duration-300 active:scale-95">Trade Now</button>
+<img alt="User profile" class="w-10 h-10 rounded-full border border-white/10" data-alt="A small circular avatar of a professional in a dark suit against a subtle gradient background. The style is modern, sharp, and high-contrast, fitting a premium financial application's aesthetic. High fidelity, obsidian precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCr5Fz76lG5aZrnoF2zCsNBwLKvNYCk-nvRfY0SbCDP3l_QwJYnmnarO1YUS1xCKKeBXFGdncg0jkKUI3pESkCYEQ8GZeyUPI625hz_dn2ry2fdBheDhMR-TEOdEG_nUh2bHI1miJ1DCsetU3a3JMGWk7OLEv1pz6N9bxr3u3yPlP0zTuuIGksUHO70H8pEmFjVqIfMY9GsmLb9-INFYuZRtHmkR4pfpTD_SAxujdQ0-UF31uA3PU1-Hw"/>
+</div>
+</div>
+</nav>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="relative px-margin-desktop py-24 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden min-h-[716px]">
+<!-- Decorative Background Element -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none flex justify-center items-center">
+<div class="w-[800px] h-[800px] rounded-full bg-primary-container blur-[120px] mix-blend-screen"></div>
+</div>
+<div class="relative z-10 max-w-4xl mx-auto space-y-8">
+<h1 class="font-display-lg text-display-lg text-on-surface">Institutional Access to <br class="hidden md:block"/>India's Unicorns</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">Trade unlisted shares and pre-IPO equities with institutional-grade precision and secure escrow.</p>
+<div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+<button class="btn-primary text-white font-body-md text-body-md px-8 py-4 rounded-lg transition-all duration-300 active:scale-95">Start Exploring</button>
+<button class="widget-layer text-on-surface hover:bg-surface-bright transition-colors font-body-md text-body-md px-8 py-4 rounded-lg border border-white/5 active:scale-95">View Portfolio</button>
+</div>
+</div>
+</section>
+<!-- Trust Indicators -->
+<section class="border-y border-white/5 bg-surface-container-low py-8">
+<div class="px-margin-desktop mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">SEBI Registered RIA Compliance</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container" data-icon="lock">lock</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Secure Smart-Contract Escrow</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container" data-icon="water_drop">water_drop</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Verified Institutional Liquidity</span>
+</div>
+</div>
+</section>
+<!-- Market Grid -->
+<section class="px-margin-desktop py-24 max-w-7xl mx-auto space-y-12">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Trending Equities</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Live unlisted market activity.</p>
+</div>
+<button class="text-primary hover:text-primary-fixed transition-colors flex items-center gap-2 font-body-md text-body-md">
+                    View All Markets <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-widget-gap">
+<!-- Swiggy Card -->
+<div class="widget-layer rounded-xl p-6 hover:translate-y-[-4px] transition-transform duration-300 cursor-pointer group flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<img alt="Swiggy" class="w-12 h-12 rounded-lg object-cover" data-alt="A sleek, minimalist square logo placeholder for a modern food delivery tech company, featuring bright orange and white geometric shapes against a dark obsidian background, stylized with a slight 3D embossed look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoNDqKgNGv3UJHHeV1Sv6w21-k3J682folva1zewUCv_G7AtPlF5Aqx75FD9VRIR4GMVNPm_kbFOx7AahfOvYLDq_fWbeWedNCysa6ZkImxn5HXJ5r6iRj1tiwuzf2jEMWb8iwUNkGDhNSxcImR3H32GvZy84OZxfL0dvPcKavVTGYTpJ8ObJyhmPMS7gvyWOit6FN4JQciZOuoyvKRSZc53l0h9KRyVURc38EZB8w4WWbAVP1LEGKjQ"/>
+<span class="px-2 py-1 rounded bg-secondary-container/10 text-secondary-container font-label-caps text-label-caps flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> 4.2%
+                        </span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Swiggy</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Consumer Tech</p>
+</div>
+<div class="pt-4 border-t border-white/5">
+<p class="font-data-lg text-data-lg text-on-surface">₹425.50</p>
+<p class="font-label-caps text-label-caps text-outline">Last Traded Price</p>
+</div>
+</div>
+<!-- Razorpay Card -->
+<div class="widget-layer rounded-xl p-6 hover:translate-y-[-4px] transition-transform duration-300 cursor-pointer group flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<img alt="Razorpay" class="w-12 h-12 rounded-lg object-cover" data-alt="A sleek, minimalist square logo placeholder for a leading fintech company, featuring sharp blue and white abstract lines representing financial data flow, set against a dark obsidian background with a premium finish." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAx7XSDBXBaINXootpFzOd-aBsi3TlpshUKabfvGHbxtgRbB1LloMl0CR0RWj38-7tjzcj1DewglWzIwOId3p7fmKLM9tTQvgPVk8PYD0qRxqzL1RyPRUq77NvrrphiWj-6b7IaaQCt27eqWt5_VFj5DPGCkj6SdZDa1E2XtiKH6MxmS4WhZeKe6krwb-ZYDtlf8kew3hvHZOPCv2qzTYRh9TA8Bu3zWJGzjDD6sMvcGSydaBIs5NQK7w"/>
+<span class="px-2 py-1 rounded bg-secondary-container/10 text-secondary-container font-label-caps text-label-caps flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> 1.8%
+                        </span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Razorpay</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Fintech</p>
+</div>
+<div class="pt-4 border-t border-white/5">
+<p class="font-data-lg text-data-lg text-on-surface">₹1,250.00</p>
+<p class="font-label-caps text-label-caps text-outline">Last Traded Price</p>
+</div>
+</div>
+<!-- Pharmeasy Card -->
+<div class="widget-layer rounded-xl p-6 hover:translate-y-[-4px] transition-transform duration-300 cursor-pointer group flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<img alt="Pharmeasy" class="w-12 h-12 rounded-lg object-cover" data-alt="A sleek, minimalist square logo placeholder for a digital health company, featuring a stylized glowing teal medical cross and soft white curves on a dark obsidian background, embodying modern healthcare tech." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVdXOulG_o5CCsp6BWgbYBO-CKDd0bknoy2oO6kLpLuDJrjl3DSjaJ7jWj6HvZSzieP8bXw0VLjbzl61UC-FS--lRypX-wEWKVVUxWlaC3ZPZUMT0P8TwUQqcoQedJ6WshJxVdYk0VqsGktXYhBr6G_wPp7kwJbozgpdD-6BevfGWlvyFRs3qnOsAUGVCg5ZidihyozVvco_KAzhaYA5ORTPUyiKPl011jiVSnwTPAjgkujzXVVT0veQ"/>
+<span class="px-2 py-1 rounded bg-error-container/20 text-error font-label-caps text-label-caps flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_down">trending_down</span> -2.1%
+                        </span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Pharmeasy</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Health Tech</p>
+</div>
+<div class="pt-4 border-t border-white/5">
+<p class="font-data-lg text-data-lg text-on-surface">₹85.20</p>
+<p class="font-label-caps text-label-caps text-outline">Last Traded Price</p>
+</div>
+</div>
+<!-- Ola Electric Card -->
+<div class="widget-layer rounded-xl p-6 hover:translate-y-[-4px] transition-transform duration-300 cursor-pointer group flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<img alt="Ola Electric" class="w-12 h-12 rounded-lg object-cover" data-alt="A sleek, minimalist square logo placeholder for an EV manufacturer, featuring bright neon green electric lightning motifs interlocked with clean white geometry on a dark obsidian background, conveying advanced automotive technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrT3clrXoUNVGacPenZxGomNQHE_duBdoI3vhtsfL207_CTG5y1Qdx4tg6pdfnaD0MnISe6rCdzu_KKqo9QSWWHLbTZw6O13j-06ZscCNNeAd-EV85utU184lGZ8CjYYT5cXSeEtyjSRYfjghZEmoPCxk8ikhZ5_l4SnSBFSdixycgCx682STuOmqCLi1rCPNDITu514bpas8oEmx5Iw0cyVdZVXWxZ7GPARSTY7JXyih7zBdUvOK29w"/>
+<span class="px-2 py-1 rounded bg-secondary-container/10 text-secondary-container font-label-caps text-label-caps flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> 8.5%
+                        </span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Ola Electric</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">EV Mobility</p>
+</div>
+<div class="pt-4 border-t border-white/5">
+<p class="font-data-lg text-data-lg text-on-surface">₹145.80</p>
+<p class="font-label-caps text-label-caps text-outline">Last Traded Price</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest w-full py-12 border-t border-white/5 text-on-surface-variant font-body-md text-body-md">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter px-margin-desktop mx-auto max-w-full">
+<div class="col-span-1 lg:col-span-2 space-y-4">
+<div class="font-headline-sm text-primary">Romer Alpha</div>
+<p class="text-outline max-w-md">© 2024 Romer Alpha. SEBI Registered RIA. Secure Escrow Enabled.</p>
+</div>
+<div class="space-y-4 flex flex-col">
+<a class="text-outline hover:text-secondary transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-outline hover:text-secondary transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="text-outline hover:text-secondary transition-colors opacity-80 hover:opacity-100" href="#">Risk Disclosure</a>
+</div>
+<div class="space-y-4 flex flex-col">
+<a class="text-outline hover:text-secondary transition-colors opacity-80 hover:opacity-100" href="#">Contact Support</a>
+<a class="text-outline hover:text-secondary transition-colors opacity-80 hover:opacity-100" href="#">Grievance Redressal</a>
+</div>
+</div>
+</footer>
+</body></html>

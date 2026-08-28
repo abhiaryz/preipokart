@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ROMER ALPHA - Market Desk</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#e1e2eb",
+                        "secondary-container": "#00f4b3",
+                        "tertiary-container": "#6a6c74",
+                        "on-surface-variant": "#c3c5d9",
+                        "outline-variant": "#434656",
+                        "surface": "#111318",
+                        "on-tertiary-fixed": "#191c22",
+                        "inverse-surface": "#e2e2e8",
+                        "on-primary-fixed": "#001550",
+                        "on-background": "#e2e2e8",
+                        "surface-container-high": "#282a2e",
+                        "outline": "#8d90a2",
+                        "on-secondary": "#003826",
+                        "surface-container-lowest": "#0c0e12",
+                        "on-secondary-fixed-variant": "#005139",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2f3035",
+                        "background": "#111318",
+                        "on-tertiary-container": "#edeef7",
+                        "surface-bright": "#37393e",
+                        "primary-fixed": "#dce1ff",
+                        "surface-container": "#1e2024",
+                        "secondary-fixed-dim": "#00e1a5",
+                        "on-secondary-container": "#006b4c",
+                        "primary": "#b6c4ff",
+                        "surface-variant": "#333539",
+                        "secondary": "#ccffe5",
+                        "on-secondary-fixed": "#002115",
+                        "on-surface": "#e2e2e8",
+                        "surface-tint": "#b6c4ff",
+                        "on-primary-container": "#edeeff",
+                        "on-primary": "#00277f",
+                        "surface-container-low": "#1a1c20",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#3effbf",
+                        "error-container": "#93000a",
+                        "tertiary": "#c4c6cf",
+                        "on-primary-fixed-variant": "#003ab2",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "primary-container": "#1a5cff",
+                        "tertiary-fixed-dim": "#c4c6cf",
+                        "surface-container-highest": "#333539",
+                        "on-tertiary-fixed-variant": "#44474e",
+                        "on-error": "#690005",
+                        "on-tertiary": "#2d3037",
+                        "inverse-primary": "#004ee8",
+                        "surface-dim": "#111318"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "unit": "4px",
+                        "widget-gap": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "data-md": ["JetBrains Mono"],
+                        "body-md": ["Inter Tight"],
+                        "body-lg": ["Inter Tight"],
+                        "headline-sm": ["Inter Tight"],
+                        "display-lg": ["Inter Tight"],
+                        "data-lg": ["JetBrains Mono"],
+                        "headline-md": ["Inter Tight"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "data-md": ["14px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-sm": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "data-lg": ["20px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "headline-md": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0A0C10; /* Obsidian Night base */
+            color: #e2e2e8;
+        }
+        /* Glassmorphic Widget Base (Level 1) */
+        .widget-base {
+            background-color: #0F1218;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        /* Glassmorphic Overlay (Level 2) */
+        .glass-panel {
+            background-color: rgba(22, 25, 32, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #b6c4ff, #dce1ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #1a5cff, #004ee8);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(26, 92, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 12px rgba(26, 92, 255, 0.4);
+        }
+        
+        .table-row-hover:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface antialiased overflow-x-hidden min-h-screen flex flex-col md:flex-row">
+<!-- TopNavBar (Mobile Only) -->
+<nav class="md:hidden fixed top-0 w-full z-50 border-b border-white/5 bg-surface/80 shadow-[0_4px_20px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+<div class="flex justify-between items-center h-20 px-margin-mobile w-full max-w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:bg-surface-bright/50 transition-all duration-300 p-2 rounded-lg" data-icon="menu">menu</span>
+<span class="font-display-lg text-[24px] font-bold text-primary tracking-tighter">ROMER ALPHA</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-bright/50 transition-all duration-300 p-2 rounded-lg" data-icon="notifications">notifications</span>
+<img alt="User portfolio profile avatar" class="w-8 h-8 rounded-full border border-outline-variant/30 object-cover" data-alt="A professional headshot of a corporate trader in a sharp suit, clean modern studio lighting, dark background, premium institutional finance aesthetic. Deep obsidian and crisp white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVfTzvWoWTPvohTqwNvxLJ1AQdZHC_SuFwFstR7KoM9XQU-7MHOXn50G7XCWtoHdaLmjhbk-prTlnM3gD5SKUPpe5-7kYreqSFClDIPna6VWodhzdCcWf8he5qiVvz-bMMWAXdgmW3H4zzkvH35KvkuqjeeiX-9H3R9rrryke0VOy7HLQwvGNxyMU82d4nMCqSqkZGYDpfn2TXt49bEvDVWK9_P9ND1MZcdbxSIw0wv63pNXzSlwT38A"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Desktop) -->
+<aside class="hidden md:flex flex-col py-8 px-6 gap-widget-gap fixed left-0 h-full w-72 z-40 bg-surface-container-lowest border-r border-outline-variant/10 shadow-2xl shadow-black">
+<div class="flex items-center gap-4 mb-8">
+<img alt="Institutional Account Logo" class="w-10 h-10 rounded-lg object-cover" data-alt="A sleek, minimalist, abstract geometric logo representing a high-end institutional investment firm. Monochromatic silver and deep blue, modern corporate luxury style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTyNWEH6BhT0Oj_VMpuZMwWu5TKgDsOBjSrmb2bd7QbABV0Jbka3vqg_cx9T3UKG-2g89neN30Cx6nlcn563SaGDVpv5B7ByAZBV7MfA6qBv06STR5DXRNqi0PlShWx-PiX7n_zDLvf1JAYHHWByOWLi9LUW1utIX2xNBwyONrc5vnf1Vejn5snKk9uhHkGc108xpsGSRw_DUMJdVmtyUfBbhGvPwiFl7rSFdOeCPtU3REwGR84FLeow"/>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-black text-on-surface tracking-widest">ROMER CAPITAL</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-70">Verified Institutional</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-tertiary-fixed-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<!-- Active (Market Desk) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats" data-weight="fill" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+<span class="font-label-caps text-label-caps">Market Desk</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-tertiary-fixed-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="font-label-caps text-label-caps">Bid Book</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-tertiary-fixed-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-label-caps text-label-caps">Contract Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-tertiary-fixed-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-label-caps text-label-caps">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-tertiary-fixed-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-label-caps text-label-caps">Support</span>
+</a>
+</nav>
+<button class="w-full py-3 rounded-lg btn-primary font-label-caps text-label-caps text-white mb-6">
+            Trade Now
+        </button>
+<div class="flex flex-col gap-2 mt-auto border-t border-outline-variant/10 pt-4">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-tertiary-fixed-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-[10px]">Security Status</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-tertiary-fixed-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-[10px]">API Access</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 pt-24 md:pt-10 px-margin-mobile md:px-margin-desktop pb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-widget-gap">
+<!-- Header & Top App Bar equivalent for Desktop Canvas -->
+<header class="flex justify-between items-end mb-4">
+<div>
+<h2 class="font-display-lg text-display-lg gradient-text tracking-tighter mb-2">Market Desk</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Real-time analysis and liquidity profiling for unlisted equities.</p>
+</div>
+<div class="hidden md:flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="bg-surface-container-highest border-none rounded-lg pl-10 pr-4 py-2 font-data-md text-data-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-1 focus:ring-primary focus:bg-surface-bright transition-colors w-64 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]" placeholder="Search Markets..." type="text"/>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors p-2" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors p-2" data-icon="settings">settings</span>
+<img alt="User portfolio profile avatar" class="w-10 h-10 rounded-full border border-outline-variant/30 object-cover ml-2" data-alt="A professional headshot of a corporate trader in a sharp suit, clean modern studio lighting, dark background, premium institutional finance aesthetic. Deep obsidian and crisp white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqmahzQoMYsZP-UB7u4SCnetQTEyQWVa6DRAWHo2qqMaJi1WXRMj3XCOPvAuipvYC3FnnuLI3j1A1Qkwg4La6IPBz41eJjwEQpM1jne0YnjyWRY955BgPHbrr3ZqghYSBQy_hQYaXOtMzqnIqLGJ1zsYSvDeelItPhqdM6QChLVff3hSUyGrvj8MoLgycTHXKq25LxuCr1pwXo7ue57NgVHRyapbMx5gRcf3L39-ZfdCy8SDqxzSK8jQ"/>
+</div>
+</header>
+<!-- AI Summary (One-Second Rule) -->
+<div class="glass-panel rounded-xl p-6 border border-white/5 flex items-start gap-4">
+<div class="p-3 bg-primary-container/20 rounded-lg text-primary mt-1">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-2">ALPHA INSIGHT</h3>
+<p class="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                    Market Sentiment: <strong class="text-secondary-fixed">Bullish on Tech Pre-IPOs.</strong> Liquidity tightening in late-stage Series C; institutional bids showing aggressive accumulation patterns in AI hardware sector.
+                </p>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-widget-gap">
+<!-- Main Chart Widget -->
+<div class="widget-base rounded-xl p-gutter col-span-1 md:col-span-8 flex flex-col min-h-[400px]">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant">VOLATILITY INDEX (VIX-U)</h3>
+<div class="flex gap-2">
+<button class="px-3 py-1 rounded bg-surface-container-high font-label-caps text-[10px] hover:bg-surface-bright transition-colors">1D</button>
+<button class="px-3 py-1 rounded bg-primary-container text-on-primary-container font-label-caps text-[10px]">1W</button>
+<button class="px-3 py-1 rounded bg-surface-container-high font-label-caps text-[10px] hover:bg-surface-bright transition-colors">1M</button>
+</div>
+</div>
+<!-- Chart Area Placeholder (Simulated with Shader/Gradient for now) -->
+<div class="flex-1 relative w-full rounded-lg overflow-hidden border border-white/5 bg-[#0a0c10] flex items-center justify-center group cursor-crosshair">
+<!-- Replace with actual chart library or shader in prod -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent opacity-50"></div>
+<!-- Decorative Line Graph Simulation -->
+<svg class="w-full h-full absolute inset-0" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0,80 Q10,70 20,75 T40,60 T60,80 T80,40 T100,50 L100,100 L0,100 Z" fill="url(#grad1)" opacity="0.2"></path>
+<path class="drop-shadow-[0_0_8px_rgba(26,92,255,0.8)]" d="M0,80 Q10,70 20,75 T40,60 T60,80 T80,40 T100,50" fill="none" stroke="#1a5cff" stroke-width="0.5"></path>
+<defs>
+<lineargradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#1a5cff;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#0A0C10;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- Hover Data Tooltip (CSS Hidden) -->
+<div class="absolute top-4 left-4 bg-surface-container-highest/90 backdrop-blur border border-white/10 p-3 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+<p class="font-data-md text-data-md text-primary mb-1">Index: 142.50</p>
+<p class="font-data-md text-data-md text-secondary-fixed">+2.4% Volatility</p>
+</div>
+</div>
+</div>
+<!-- Side Metric Stack -->
+<div class="col-span-1 md:col-span-4 flex flex-col gap-widget-gap">
+<!-- Metric 1 -->
+<div class="widget-base rounded-xl p-6 flex flex-col justify-between flex-1">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-2">AGGREGATE BID VOLUME</h3>
+<div class="flex items-end justify-between">
+<div class="font-data-lg text-[40px] leading-none tracking-tight text-on-surface">
+                            $4.2B
+                        </div>
+<div class="flex items-center gap-1 text-secondary-fixed bg-secondary-fixed/10 px-2 py-1 rounded-full shadow-[0_0_10px_rgba(62,255,191,0.2)]">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+<span class="font-data-md text-[12px]">+12.5%</span>
+</div>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="widget-base rounded-xl p-6 flex flex-col justify-between flex-1">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-2">CLEARING EFFICIENCY</h3>
+<div class="flex items-end justify-between">
+<div class="font-data-lg text-[40px] leading-none tracking-tight text-on-surface">
+                            94.2%
+                        </div>
+<div class="flex items-center gap-1 text-error bg-error/10 px-2 py-1 rounded-full shadow-[0_0_10px_rgba(255,180,171,0.2)]">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_down">trending_down</span>
+<span class="font-data-md text-[12px]">-1.2%</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container-highest h-1 rounded-full mt-4 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 94.2%"></div>
+</div>
+</div>
+</div>
+<!-- Data Table Widget (Full Width) -->
+<div class="widget-base rounded-xl p-6 col-span-1 md:col-span-12 overflow-hidden flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant">ACTIVE ORDER BOOK - TIER 1 ASSETS</h3>
+<button class="flex items-center gap-2 text-primary hover:text-primary-fixed transition-colors">
+<span class="font-label-caps text-label-caps">View Full Book</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-white/10">
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant font-normal">ASSET ID</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant font-normal">SECTOR</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant font-normal text-right">LAST CLEARING</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant font-normal text-right">BEST BID</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant font-normal text-right">BEST ASK</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant font-normal text-center">STATUS</th>
+</tr>
+</thead>
+<tbody class="font-data-md text-data-md">
+<tr class="table-row-hover border-b border-white/5 transition-colors cursor-pointer">
+<td class="py-4 px-4 text-on-surface flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(182,196,255,0.8)]"></div>
+                                    NEX-AI.SERIES.C
+                                </td>
+<td class="py-4 px-4 text-on-surface-variant">Hardware</td>
+<td class="py-4 px-4 text-right">$45.20</td>
+<td class="py-4 px-4 text-right text-secondary-fixed">$45.10</td>
+<td class="py-4 px-4 text-right text-error">$45.50</td>
+<td class="py-4 px-4 text-center">
+<span class="inline-block px-2 py-1 rounded bg-secondary-fixed/10 text-secondary-fixed font-label-caps text-[10px] border border-secondary-fixed/20">LIQUID</span>
+</td>
+</tr>
+<tr class="table-row-hover border-b border-white/5 transition-colors cursor-pointer">
+<td class="py-4 px-4 text-on-surface flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary/30"></div>
+                                    STR-BIO.PRE.IPO
+                                </td>
+<td class="py-4 px-4 text-on-surface-variant">Biotech</td>
+<td class="py-4 px-4 text-right">$112.50</td>
+<td class="py-4 px-4 text-right text-secondary-fixed">$110.00</td>
+<td class="py-4 px-4 text-right text-error">$115.00</td>
+<td class="py-4 px-4 text-center">
+<span class="inline-block px-2 py-1 rounded bg-surface-container-high text-on-surface-variant font-label-caps text-[10px] border border-outline-variant/30">ILLIQUID</span>
+</td>
+</tr>
+<tr class="table-row-hover transition-colors cursor-pointer">
+<td class="py-4 px-4 text-on-surface flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(182,196,255,0.8)]"></div>
+                                    QNT-SYS.SERIES.D
+                                </td>
+<td class="py-4 px-4 text-on-surface-variant">Fintech</td>
+<td class="py-4 px-4 text-right">$88.90</td>
+<td class="py-4 px-4 text-right text-secondary-fixed">$88.85</td>
+<td class="py-4 px-4 text-right text-error">$89.10</td>
+<td class="py-4 px-4 text-center">
+<span class="inline-block px-2 py-1 rounded bg-secondary-fixed/10 text-secondary-fixed font-label-caps text-[10px] border border-secondary-fixed/20">LIQUID</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</body></html>
