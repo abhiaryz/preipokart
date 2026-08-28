@@ -15,3 +15,6 @@ dist/
 .cursor/
 .claude/
 .agents/
+
+# Superdesign temp HTML
+.superdesign/tmp/

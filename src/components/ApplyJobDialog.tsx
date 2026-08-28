@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useId, useRef, useState } from 'react';
 import { ArrowRight, FileText, X } from '@phosphor-icons/react';
+import { api, errorMessage } from '../api';
+import type { Job } from '../api/types';
 import { useAuth } from '../auth';
-import { hasApplied, pushApplication } from '../data/applications';
-import type { Job } from '../data/jobs';
 import { Field, InlineNotice } from './ui';
 import posthog, { isPostHogConfigured } from '../posthog';
 
@@ -23,7 +23,15 @@ function digitsOnly(value: string) {
   return value.replace(/\D/g, '');
 }
 
-export function ApplyJobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
+export function ApplyJobDialog({
+  job,
+  onClose,
+  onApplied,
+}: {
+  job: Job;
+  onClose: () => void;
+  onApplied?: (jobId: string) => void;
+}) {
   const { user } = useAuth();
   const titleId = useId();
   const nameRef = useRef<HTMLInputElement>(null);
@@ -38,7 +46,7 @@ export function ApplyJobDialog({ job, onClose }: { job: Job; onClose: () => void
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
-  const already = hasApplied(job.id);
+  const [already, setAlready] = useState(false);
 
   useEffect(() => {
     nameRef.current?.focus();
@@ -56,6 +64,20 @@ export function ApplyJobDialog({ job, onClose }: { job: Job; onClose: () => void
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [busy, onClose]);
+
+  useEffect(() => {
+    if (!email.includes('@')) return;
+    let cancelled = false;
+    api
+      .checkJobApplication(job.id, email.trim())
+      .then((result) => {
+        if (!cancelled) setAlready(Boolean(result.applied));
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [email, job.id]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -89,21 +111,20 @@ export function ApplyJobDialog({ job, onClose }: { job: Job; onClose: () => void
     setError('');
     setBusy(true);
     try {
-      await pushApplication({
-        jobId: job.id,
-        jobTitle: job.title,
-        name: trimmedName,
-        email: trimmedEmail,
-        phone: phone.trim(),
-        city: city.trim(),
-        linkedin: linkedin.trim(),
-        note: note.trim(),
-        file: resume,
-      });
+      const form = new FormData();
+      form.append('name', trimmedName);
+      form.append('email', trimmedEmail);
+      form.append('phone', phone.trim());
+      form.append('city', city.trim());
+      if (linkedin.trim()) form.append('linkedin', linkedin.trim());
+      if (note.trim()) form.append('note', note.trim());
+      form.append('resume', resume);
+      await api.applyForJob(job.id, form);
       if (isPostHogConfigured) posthog.capture('job_application_submitted', { job_id: job.id });
+      onApplied?.(job.id);
       setSent(true);
-    } catch {
-      setError('Could not save this application. Try again from this browser.');
+    } catch (err) {
+      setError(errorMessage(err, 'Could not send this application. Try again.'));
     } finally {
       setBusy(false);
     }
@@ -137,9 +158,7 @@ export function ApplyJobDialog({ job, onClose }: { job: Job; onClose: () => void
 
         {sent ? (
           <div className="px-5 py-8 sm:px-6">
-            <InlineNotice tone="success">
-              Application sent for {job.title}. Your details and resume are saved on this device. Dummy hiring flow, not a live ATS.
-            </InlineNotice>
+            <InlineNotice tone="success">Application sent for {job.title}.</InlineNotice>
             <button type="button" className="btn-primary mt-6 min-h-11" onClick={onClose}>
               Done
             </button>
@@ -147,9 +166,7 @@ export function ApplyJobDialog({ job, onClose }: { job: Job; onClose: () => void
         ) : (
           <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit} noValidate>
             <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5 sm:px-6">
-              {already ? (
-                <InlineNotice tone="info">You already sent an application for this role from this browser.</InlineNotice>
-              ) : null}
+              {already ? <InlineNotice tone="info">You already sent an application for this role.</InlineNotice> : null}
               {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
 
               <Field id="apply-name" label="Full name">

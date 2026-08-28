@@ -1,5 +1,39 @@
+# Shared UI primitives
+
+Framework: React 18 + Vite + TypeScript. CSS: Tailwind 3 with CSS variables in `src/index.css`. Icons: Phosphor. No shadcn.
+
+Shared primitives live in `src/components/ui.tsx`.
+
+## PageHeader
+- File: `src/components/ui.tsx`
+- Description: Page title + optional description and action slot used on authenticated screens
+- Props: title (string), description (string?), actions (ReactNode?)
+
+## LetterMark
+- File: `src/components/ui.tsx`
+- Description: Brand mark — first letter of the label in a cobalt rounded-lg box (the product has no SVG logo)
+- Props: label (string), size ("sm" | "md" | "lg")
+
+## CompanyLogo
+- File: `src/components/ui.tsx`
+- Description: Company favicon via Google s2 with LetterMark fallback
+- Props: name, domain, size ("sm" | "md" | "lg")
+
+## Field
+- File: `src/components/ui.tsx`
+- Description: Form field wrapper with label, hint, and error
+- Props: id, label, hint?, error?, children
+
+## InlineNotice
+- File: `src/components/ui.tsx`
+- Description: Inline status banner (info / error / success)
+- Props: tone ("info" | "error" | "success"), children
+
+### Full source: `src/components/ui.tsx`
+
+```tsx
 import { useState, type ReactNode } from 'react';
-import { logoUrl } from '../lib/format';
+import { logoUrl } from '../data/stocks';
 
 export function PageHeader({
   title,
@@ -50,21 +84,20 @@ export function CompanyLogo({
   size = 'md',
 }: {
   name: string;
-  domain?: string | null;
+  domain: string;
   size?: 'sm' | 'md' | 'lg';
 }) {
   const [failed, setFailed] = useState(false);
   const box = size === 'sm' ? 'h-8 w-8' : size === 'lg' ? 'h-16 w-16' : 'h-12 w-12';
   const px = size === 'sm' ? 64 : size === 'lg' ? 128 : 96;
-  const src = logoUrl(domain, px);
 
-  if (failed || !src) {
+  if (failed) {
     return <LetterMark label={name} size={size} />;
   }
 
   return (
     <img
-      src={src}
+      src={logoUrl(domain, px)}
       alt=""
       width={px}
       height={px}
@@ -123,29 +156,4 @@ export function InlineNotice({
   );
 }
 
-export function QueryStatus({
-  loading,
-  error,
-  children,
-}: {
-  loading: boolean;
-  error?: string | null;
-  children?: ReactNode;
-}) {
-  if (loading) {
-    return (
-      <div className="flex min-h-[30vh] items-center justify-center text-sm text-on-surface-variant" role="status">
-        Loading…
-      </div>
-    );
-  }
-  if (error) {
-    return (
-      <div className="elevation-widget rounded-xl px-6 py-12 text-center" role="alert">
-        <p className="font-headline-sm text-lg text-on-surface">Could not load this page</p>
-        <p className="mt-2 font-body-md text-on-surface-variant">{error}</p>
-      </div>
-    );
-  }
-  return <>{children}</>;
-}
+```

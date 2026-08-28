@@ -19,20 +19,9 @@ import {
 import { CompanyLogo } from '../components/ui';
 import HeroBackgroundAnimation from '../components/HeroBackgroundAnimation';
 import { SiteFooter, SiteHeader } from '../components/PublicLayout';
-import { stocks } from '../data/stocks';
-
-const heroStocks = [
-  stocks.find((s) => s.id === 'SWIGGY')!,
-  stocks.find((s) => s.id === 'RAZORPAY')!,
-  stocks.find((s) => s.id === 'OLA_ELECTRIC')!,
-];
-
-const stats = [
-  { value: `${stocks.filter((s) => s.id !== 'STRIP').length}+`, label: 'Private companies' },
-  { value: '₹2.4 Cr', label: 'Held in escrow' },
-  { value: '48 hrs', label: 'Avg. match time' },
-  { value: '100%', label: 'KYC verified trades' },
-];
+import { api } from '../api';
+import type { FaqItem, StockListItem } from '../api/types';
+import { useApi } from '../hooks/useApi';
 
 const trustSignals = [
   { icon: Vault, title: 'Escrow protected', body: 'Funds stay with us until both sides complete the deal.' },
@@ -85,26 +74,10 @@ const features = [
   },
 ];
 
-const faqs = [
-  {
-    q: 'Are these companies listed on NSE or BSE?',
-    a: 'No. PreIPOKart is for shares in companies that are still private. Listing on a public exchange is not guaranteed.',
-  },
-  {
-    q: 'What if nobody takes the other side?',
-    a: 'Your request can sit unmatched. You can cancel it from Place order. Illiquid names often take longer.',
-  },
-  {
-    q: 'Is this investment advice?',
-    a: 'No. We provide a place to request trades. Do your own research. Unlisted shares can lose value and may be hard to sell.',
-  },
-];
-
 const sampleChartPrices = [412, 408, 415, 411, 418, 414, 421, 419, 424, 422, 426, 423, 428, 425, 429, 427, 431, 426, 424, 425.5];
 const sampleChartVolume = [42, 28, 55, 38, 62, 45, 71, 52, 48, 66, 58, 44, 73, 51, 39, 67, 54, 61, 47, 59];
 
-function SampleBookChart() {
-  const featured = heroStocks[0];
+function SampleBookChart({ featured }: { featured: StockListItem }) {
   const chartW = 320;
   const chartH = 72;
   const volH = 28;
@@ -298,7 +271,26 @@ function SectionHeading({
 }
 
 export default function Landing() {
-  const listedCompanies = stocks.filter((s) => s.id !== 'STRIP');
+  const { data: stockList } = useApi(() => api.listStocks({ sort: 'change' }), []);
+  const { data: publicStats } = useApi(() => api.getPublicStats(), []);
+  const { data: faqList } = useApi(() => api.listFaqs(), []);
+  const listedCompanies = stockList?.data ?? [];
+  const heroStocks = listedCompanies.slice(0, 4);
+  const featured = heroStocks[0];
+  const landingFaqs: FaqItem[] = (faqList?.data ?? []).slice(0, 3);
+  const lastPrints = heroStocks.slice(0, 3).map((stock, index) => ({
+    time: ['14:52', '14:49', '14:41'][index] ?? '14:30',
+    ticker: stock.ticker,
+    price: `₹${stock.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    qty: String([40, 12, 200][index] ?? 10),
+    up: stock.change >= 0,
+  }));
+  const stats = [
+    { value: `${publicStats?.companyCount ?? listedCompanies.length}+`, label: 'Private companies' },
+    { value: publicStats?.escrowHeldLabel ?? '—', label: 'Held in escrow' },
+    { value: publicStats ? `${publicStats.avgMatchHours} hrs` : '—', label: 'Avg. match time' },
+    { value: publicStats ? `${publicStats.kycVerifiedTradePct}%` : '—', label: 'KYC verified trades' },
+  ];
 
   return (
     <div className="min-h-[100dvh] bg-canvas text-on-surface">
@@ -323,10 +315,16 @@ export default function Landing() {
 
           <div className="relative z-[2] mx-auto w-full max-w-[1400px] px-4 pb-10 pt-4 sm:px-6 sm:pb-12 sm:pt-5 lg:px-8 lg:pb-14 lg:pt-6">
             <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10 xl:gap-12">
-              <div className="animate-fade-up min-w-0">
-                <p className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
-                  Unlisted equity, India
-                </p>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
+                    Unlisted equity, India
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-bid/25 bg-bid/10 px-2 py-0.5 font-label-caps text-[10px] uppercase tracking-wider text-bid">
+                    <span className="h-1.5 w-1.5 rounded-full bg-bid" />
+                    Live book
+                  </span>
+                </div>
 
                 <h1 className="mt-3 max-w-[15ch] text-[clamp(1.875rem,4vw+0.75rem,3rem)] font-semibold leading-[1.08] tracking-tight sm:mt-4 lg:max-w-[16ch] lg:text-display-lg">
                   Buy shares in companies{' '}
@@ -354,7 +352,7 @@ export default function Landing() {
               </div>
 
               {/* Market preview card */}
-              <div className="animate-fade-up min-w-0 lg:animate-none" style={{ animationDelay: '120ms' }}>
+              <div className="min-w-0">
                 <div className="landing-market-card elevation-active overflow-hidden rounded-xl sm:rounded-2xl">
                   <div className="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-4 py-3 sm:items-center sm:px-5 sm:py-3.5">
                     <div className="min-w-0">
@@ -365,46 +363,76 @@ export default function Landing() {
                         Illustrative, not live quotes
                       </p>
                     </div>
-                    <span className="inline-flex shrink-0 items-center rounded-md border border-outline-variant/40 bg-surface-container-low px-2 py-1 font-data-md text-[10px] text-bid sm:text-[11px]">
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-outline-variant/40 bg-surface-container-low px-2 py-1 font-data-md text-[10px] text-bid sm:text-[11px]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-bid" />
                       Open
                     </span>
                   </div>
 
-                  <SampleBookChart />
+                  {featured ? <SampleBookChart featured={featured} /> : <div className="h-40 bg-surface-container-low/30" />}
 
-                  <div className="hidden px-5 py-2 sm:grid sm:grid-cols-[1fr_auto_auto_auto] sm:gap-4 sm:text-[11px] sm:uppercase sm:tracking-wider sm:text-on-surface-variant">
+                  <div className="hidden border-b border-outline-variant/30 bg-canvas/40 px-5 py-2 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-1">
+                    <span className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
+                      Last prints
+                    </span>
+                    {lastPrints.map((print) => (
+                      <span key={`${print.ticker}-${print.time}`} className="font-data-md text-[10px] text-on-surface-variant">
+                        {print.time}{' '}
+                        <span className={print.up ? 'text-bid' : 'text-ask'}>
+                          {print.ticker} {print.price} × {print.qty}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="hidden px-5 py-2 sm:grid sm:grid-cols-[1fr_auto_auto_auto_auto] sm:gap-4 sm:text-[11px] sm:uppercase sm:tracking-wider sm:text-on-surface-variant">
                     <span>Company</span>
                     <span className="text-right">Bid</span>
                     <span className="text-right">Ask</span>
+                    <span className="text-right">LTP</span>
                     <span className="text-right">Change</span>
                   </div>
 
                   <ul className="divide-y divide-outline-variant/30">
-                    {heroStocks.map((company) => {
+                    {heroStocks.map((company, index) => {
                       const bid = company.price * 0.998;
                       const ask = company.price * 1.004;
+                      const bidDepth = [78, 62, 40, 33][index] ?? 50;
+                      const askDepth = [46, 54, 68, 71][index] ?? 50;
                       return (
                         <li key={company.id}>
                           <Link
                             to={`/stocks/${company.id}`}
-                            className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-4 py-3 transition duration-200 hover:bg-on-surface/[0.03] sm:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] sm:gap-3 sm:px-5 sm:py-3.5"
+                            className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-4 py-3 transition duration-200 hover:bg-on-surface/[0.03] sm:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto] sm:gap-3 sm:px-5 sm:py-3.5"
                           >
                             <CompanyLogo name={company.name} domain={company.domain} size="sm" />
                             <div className="min-w-0">
                               <p className="truncate text-sm font-medium sm:text-base">{company.name}</p>
                               <p className="truncate text-xs text-on-surface-variant">{company.sector}</p>
                             </div>
-                            <div className="hidden shrink-0 text-right font-data-md text-sm sm:block">
-                              <span className="text-bid">₹{bid.toFixed(2)}</span>
+                            <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
+                              <span className="font-data-md text-sm text-bid">₹{bid.toFixed(2)}</span>
+                              <span className="landing-depth-track bg-bid/15" aria-hidden="true">
+                                <span className="block h-full bg-bid/55" style={{ width: `${bidDepth}%` }} />
+                              </span>
+                            </div>
+                            <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
+                              <span className="font-data-md text-sm text-ask">₹{ask.toFixed(2)}</span>
+                              <span className="landing-depth-track bg-ask/15" aria-hidden="true">
+                                <span className="block h-full bg-ask/55" style={{ width: `${askDepth}%` }} />
+                              </span>
                             </div>
                             <div className="hidden shrink-0 text-right font-data-md text-sm sm:block">
-                              <span className="text-ask">₹{ask.toFixed(2)}</span>
+                              ₹{company.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </div>
                             <div className="shrink-0 text-right">
-                              <p className="font-data-md text-sm sm:text-data-md">
+                              <p className="font-data-md text-sm sm:hidden">
                                 ₹{company.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                               </p>
-                              <p className="text-xs text-bid">+{company.change}%</p>
+                              <p className={`text-xs sm:text-sm ${company.change >= 0 ? 'text-bid' : 'text-ask'}`}>
+                                {company.change >= 0 ? '+' : ''}
+                                {company.change}%
+                              </p>
                             </div>
                           </Link>
                         </li>
@@ -413,7 +441,9 @@ export default function Landing() {
                   </ul>
 
                   <div className="flex flex-col gap-2 border-t border-outline-variant/40 bg-surface-container-low/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                    <p className="text-xs text-on-surface-variant">3 of {listedCompanies.length} companies shown</p>
+                    <p className="text-xs text-on-surface-variant">
+                      {heroStocks.length} of {listedCompanies.length} companies shown
+                    </p>
                     <Link to="/explore" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
                       View all
                       <ArrowRight size={12} aria-hidden="true" />
@@ -597,8 +627,8 @@ export default function Landing() {
 
             <div>
               <div className="divide-y divide-outline-variant/40 rounded-2xl border border-outline-variant/45 bg-card/50">
-                {faqs.map((item) => (
-                  <details key={item.q} className="group px-5 py-1 first:pt-0 last:pb-0">
+                {landingFaqs.map((item) => (
+                  <details key={item.id} className="group px-5 py-1 first:pt-0 last:pb-0">
                     <summary className="cursor-pointer list-none py-4 font-medium marker:content-none [&::-webkit-details-marker]:hidden">
                       <span className="flex min-h-11 items-center justify-between gap-4">
                         {item.q}

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "/": {
+      "targetKind": "existing-ui",
+      "projectId": "fb0a940c-90df-4262-adc0-de8789c7d250",
+      "baselineDraftId": "34f28cf9-c4d6-4d52-9cc5-b1038c47f213",
+      "activeDraftId": "daa8c9b9-e695-4422-96a5-2630c9265ab6",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "src/pages/Landing.tsx",
+        "src/components/PublicLayout.tsx",
+        "src/components/ui.tsx",
+        "src/components/HeroBackgroundAnimation.tsx",
+        "src/index.css",
+        "tailwind.config.js"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "d078f44c1cb798ed694fde3edcb39348d6140a95db8cbf16c13d5f923b860d57",
+        "src/pages/Landing.tsx": "8dc40fd617fa4bb2f60af8fd3aaa119a4b405bd04b17931350faf247e4ff5dcd",
+        "src/components/PublicLayout.tsx": "93b060c5122acaddac30a93caf7946f8767ffca91059687aad164e8593170920",
+        "src/components/ui.tsx": "d973b092137e082e9610b932e8f38efe7dd2f8bcd76f4e12ea08ea8b0088e7c9",
+        "src/components/HeroBackgroundAnimation.tsx": "e1447f73830cfdc3cab4ae3a99b50d097543022a1b383fe4b5f49a8a973c8699",
+        "src/index.css": "7cdb74fd60052d58bbc729b20f35e14928d89650bd40672f16bdcde86f553716",
+        "tailwind.config.js": "5f223377171d607d6dec2a6765f4ceba05a346555f49723419d04928767d80d6"
+      },
+      "components": [
+        {
+          "name": "SiteHeader",
+          "id": "b3bba36c-e9df-4f77-ae3d-77f23ed79de2",
+          "sourcePath": "src/components/PublicLayout.tsx"
+        },
+        {
+          "name": "SiteFooter",
+          "id": "62192072-8e53-426b-b8cc-ad6096c01d5d",
+          "sourcePath": "src/components/PublicLayout.tsx"
+        }
+      ],
+      "drafts": {
+        "34f28cf9-c4d6-4d52-9cc5-b1038c47f213": {
+          "title": "Current landing",
+          "visualDirection": "pixel-perfect reproduction of existing two-column hero",
+          "currentVersion": 1
+        },
+        "3c604981-fbc6-4d1b-955a-e4c2b22e643c": {
+          "title": "PreIPOKart Editorial Landing",
+          "visualDirection": "editorial conversion, centered hero, timeline how-it-works",
+          "parentDraftId": "34f28cf9-c4d6-4d52-9cc5-b1038c47f213",
+          "currentVersion": 1
+        },
+        "daa8c9b9-e695-4422-96a5-2630c9265ab6": {
+          "title": "PreIPOKart Trading Desk Landing",
+          "visualDirection": "trading desk v3: live tape, last prints, bid/ask depth, sparklines, sticky mobile CTA",
+          "parentDraftId": "34f28cf9-c4d6-4d52-9cc5-b1038c47f213",
+          "currentVersion": 3
+        }
+      },
+      "updatedAt": "2026-08-28T14:28:51Z"
+    }
+  }
+}

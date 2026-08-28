@@ -1,88 +1,104 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { api, errorMessage } from './api';
+import { clearSession, hydrateTokensFromStorage, persistSession } from './api/client';
+import type { AuthSession, SessionUser } from './api/types';
 import posthog, { isPostHogConfigured } from './posthog';
 
-const STORAGE_KEY = 'preipokart-auth';
-
 export type AuthUser = {
+  id: string;
   email: string;
   name: string;
+  mobile?: string | null;
 };
 
 type AuthContextValue = {
   user: AuthUser | null;
-  login: (email: string) => void;
-  logout: () => void;
+  ready: boolean;
+  applySession: (session: AuthSession) => void;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
-  login: () => {},
-  logout: () => {},
+  ready: false,
+  applySession: () => {},
+  logout: async () => {},
 });
 
-function readUser(): AuthUser | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as AuthUser;
-    if (!parsed?.email) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function displayName(identifier: string) {
-  if (identifier.includes('@')) {
-    const local = identifier.split('@')[0] || 'Investor';
-    return local.replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  }
-  const digits = identifier.replace(/\D/g, '');
-  return digits ? `Investor ${digits.slice(-4)}` : 'Investor';
+function toAuthUser(user: SessionUser): AuthUser {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name?.trim() || user.email.split('@')[0] || 'Investor',
+    mobile: user.mobile,
+  };
 }
 
 function identifyUser(user: AuthUser) {
   if (!isPostHogConfigured) return;
-  // This prototype has no user primary key, so email is the only stable identifier available.
-  posthog.identify(user.email, { email: user.email, name: user.name });
+  posthog.identify(user.id, { email: user.email, name: user.name });
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => readUser());
-  const identifiedPersistedUser = useRef(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [ready, setReady] = useState(false);
+  const identified = useRef(false);
 
   useEffect(() => {
-    if (user && !identifiedPersistedUser.current) {
-      identifyUser(user);
-      identifiedPersistedUser.current = true;
-    }
-  }, [user]);
+    let cancelled = false;
+    const stored = hydrateTokensFromStorage();
 
-  const login = useCallback((identifier: string) => {
-    const isEmail = identifier.includes('@');
-    const digits = identifier.replace(/\D/g, '');
-    const next = {
-      email: isEmail ? identifier : `${digits}@mobile.preipokart.demo`,
-      name: displayName(identifier),
+    const bootstrap = async () => {
+      if (!stored?.accessToken && !stored?.refreshToken) {
+        if (!cancelled) setReady(true);
+        return;
+      }
+      try {
+        const me = await api.me();
+        if (cancelled) return;
+        const next = toAuthUser(me);
+        setUser(next);
+        identifyUser(next);
+        identified.current = true;
+      } catch {
+        clearSession();
+        if (!cancelled) setUser(null);
+      } finally {
+        if (!cancelled) setReady(true);
+      }
     };
-    if (user && user.email !== next.email && isPostHogConfigured) {
+
+    void bootstrap();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const applySession = useCallback((session: AuthSession) => {
+    persistSession(session);
+    const next = toAuthUser(session.user);
+    if (user && user.id !== next.id && isPostHogConfigured) {
       posthog.reset();
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     identifyUser(next);
-    identifiedPersistedUser.current = true;
+    identified.current = true;
     setUser(next);
   }, [user]);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+  const logout = useCallback(async () => {
+    try {
+      await api.logout();
+    } catch {
+      // Session is cleared locally either way.
+    }
+    clearSession();
     if (isPostHogConfigured) posthog.reset();
-    identifiedPersistedUser.current = false;
+    identified.current = false;
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ user, login, logout }), [user, login, logout]);
+  const value = useMemo(() => ({ user, ready, applySession, logout }), [user, ready, applySession, logout]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
@@ -100,10 +116,19 @@ export function loginPath(next: string) {
 }
 
 export function RequireAuth({ children }: { children?: ReactNode }) {
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
   const location = useLocation();
+  if (!ready) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-sm text-on-surface-variant" role="status">
+        Loading…
+      </div>
+    );
+  }
   if (!user) {
     return <Navigate to={loginPath(`${location.pathname}${location.search}`)} replace />;
   }
   return children ? <>{children}</> : <Outlet />;
 }
+
+export { errorMessage };

@@ -1,32 +1,27 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CaretDown, MagnifyingGlass } from '@phosphor-icons/react';
-import { faqCategories, faqItems, type FaqCategory } from '../data/faqs';
+import { QueryStatus } from '../components/ui';
+import { api } from '../api';
+import { useApi } from '../hooks/useApi';
 
 export default function Faq() {
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState<FaqCategory | 'all'>('all');
-
-  const results = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return faqItems.filter((item) => {
-      const inCategory = category === 'all' || item.category === category;
-      if (!inCategory) return false;
-      if (!needle) return true;
-      return item.q.toLowerCase().includes(needle) || item.a.toLowerCase().includes(needle);
-    });
-  }, [query, category]);
+  const [category, setCategory] = useState('all');
+  const { data, error, loading } = useApi(() => api.listFaqs({ q: query, category }), [query, category]);
+  const items = data?.data ?? [];
+  const categories = [{ id: 'all', label: 'All' }, ...(data?.meta.categories ?? [])];
 
   const grouped = useMemo(() => {
-    const order = faqCategories.filter((c) => c.id !== 'all').map((c) => c.id as FaqCategory);
+    const order = categories.filter((c) => c.id !== 'all');
     return order
-      .map((id) => ({
-        id,
-        label: faqCategories.find((c) => c.id === id)?.label ?? id,
-        items: results.filter((item) => item.category === id),
+      .map((tab) => ({
+        id: tab.id,
+        label: tab.label,
+        items: items.filter((item) => item.category === tab.id),
       }))
       .filter((group) => group.items.length > 0);
-  }, [results]);
+  }, [categories, items]);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -34,7 +29,7 @@ export default function Faq() {
         <p className="font-label-caps text-label-caps uppercase text-primary">Support</p>
         <h1 className="mt-2 font-headline-md text-[32px] tracking-tight text-on-surface md:text-headline-md">FAQ</h1>
         <p className="mt-2 max-w-[65ch] font-body-md text-body-md text-on-surface-variant">
-          Straight answers about unlisted shares, matching, fees, and KYC. Dummy copy for the landing site — not legal advice.
+          Straight answers about unlisted shares, matching, fees, and KYC.
         </p>
       </header>
 
@@ -60,7 +55,7 @@ export default function Faq() {
       </div>
 
       <div className="mb-8 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="FAQ topics">
-        {faqCategories.map((tab) => {
+        {categories.map((tab) => {
           const pressed = category === tab.id;
           return (
             <button
@@ -80,42 +75,44 @@ export default function Faq() {
         })}
       </div>
 
-      {grouped.length === 0 ? (
-        <p className="card p-6 text-sm text-on-surface-variant" role="status">
-          No questions match “{query}”. Try another word, or{' '}
-          <button type="button" className="cursor-pointer text-primary underline" onClick={() => setQuery('')}>
-            clear search
-          </button>
-          .
-        </p>
-      ) : (
-        <div className="space-y-8">
-          {grouped.map((group) => (
-            <section key={group.id} aria-labelledby={`faq-${group.id}`}>
-              <h2 id={`faq-${group.id}`} className="mb-3 font-headline-sm text-lg text-on-surface">
-                {group.label}
-              </h2>
-              <div className="divide-y divide-outline-variant/40 overflow-hidden rounded-xl border border-outline-variant/45">
-                {group.items.map((item) => (
-                  <details key={item.id} id={item.id} className="group bg-card open:bg-surface-container-low">
-                    <summary className="cursor-pointer list-none px-5 py-1 marker:content-none [&::-webkit-details-marker]:hidden">
-                      <span className="flex min-h-11 items-center justify-between gap-4 py-3 font-medium text-on-surface">
-                        {item.q}
-                        <CaretDown
-                          size={18}
-                          className="shrink-0 text-on-surface-variant transition duration-200 group-open:rotate-180"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </summary>
-                    <p className="max-w-[65ch] px-5 pb-4 text-sm leading-relaxed text-on-surface-variant">{item.a}</p>
-                  </details>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      )}
+      <QueryStatus loading={loading && !data} error={error}>
+        {grouped.length === 0 ? (
+          <p className="card p-6 text-sm text-on-surface-variant" role="status">
+            No questions match “{query}”. Try another word, or{' '}
+            <button type="button" className="cursor-pointer text-primary underline" onClick={() => setQuery('')}>
+              clear search
+            </button>
+            .
+          </p>
+        ) : (
+          <div className="space-y-8">
+            {grouped.map((group) => (
+              <section key={group.id} aria-labelledby={`faq-${group.id}`}>
+                <h2 id={`faq-${group.id}`} className="mb-3 font-headline-sm text-lg text-on-surface">
+                  {group.label}
+                </h2>
+                <div className="divide-y divide-outline-variant/40 overflow-hidden rounded-xl border border-outline-variant/45">
+                  {group.items.map((item) => (
+                    <details key={item.id} id={item.id} className="group bg-card open:bg-surface-container-low">
+                      <summary className="cursor-pointer list-none px-5 py-1 marker:content-none [&::-webkit-details-marker]:hidden">
+                        <span className="flex min-h-11 items-center justify-between gap-4 py-3 font-medium text-on-surface">
+                          {item.q}
+                          <CaretDown
+                            size={18}
+                            className="shrink-0 text-on-surface-variant transition duration-200 group-open:rotate-180"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </summary>
+                      <p className="max-w-[65ch] px-5 pb-4 text-sm leading-relaxed text-on-surface-variant">{item.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </QueryStatus>
 
       <aside className="card mt-10 space-y-3 p-6">
         <h2 className="font-headline-sm text-lg text-on-surface">Still stuck?</h2>

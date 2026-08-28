@@ -1,18 +1,11 @@
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, Plus } from '@phosphor-icons/react';
-import { CompanyLogo, PageHeader } from '../components/ui';
-import {
-  STATUS_LABEL,
-  getOrders,
-  subscribeOrders,
-  type OrderSide,
-  type OrderStatus,
-} from '../data/orders';
-
-function useOrders() {
-  return useSyncExternalStore(subscribeOrders, getOrders, getOrders);
-}
+import { CompanyLogo, PageHeader, QueryStatus } from '../components/ui';
+import { api } from '../api';
+import type { OrderSide, OrderStatus } from '../api/types';
+import { useApi } from '../hooks/useApi';
+import { STATUS_LABEL } from '../lib/format';
 
 const statusFilters: { id: 'all' | OrderStatus; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -36,26 +29,12 @@ function formatWhen(iso: string) {
 
 export default function Orders() {
   const navigate = useNavigate();
-  const orders = useOrders();
   const [side, setSide] = useState<'all' | OrderSide>('all');
   const [status, setStatus] = useState<'all' | OrderStatus>('all');
   const [query, setQuery] = useState('');
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return orders.filter((order) => {
-      if (side !== 'all' && order.side !== side) return false;
-      if (status !== 'all' && order.status !== status) return false;
-      if (!q) return true;
-      return (
-        order.company.toLowerCase().includes(q) ||
-        order.ticker.toLowerCase().includes(q) ||
-        order.id.toLowerCase().includes(q)
-      );
-    });
-  }, [orders, side, status, query]);
-
-  const openCount = orders.filter((o) => o.status === 'open' || o.status === 'matched' || o.status === 'holding').length;
+  const { data, error, loading } = useApi(() => api.listOrders({ side, status, q: query }), [side, status, query]);
+  const orders = data?.data ?? [];
+  const openCount = data?.meta.openCount ?? orders.filter((o) => o.status === 'open' || o.status === 'matched' || o.status === 'holding').length;
 
   return (
     <div>
@@ -118,65 +97,67 @@ export default function Orders() {
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/40">
-              {['Order', 'Company', 'Type', 'Shares', 'Price', 'You pay / receive', 'Status', 'Placed'].map((h) => (
-                <th key={h} className="px-3 py-2 font-mono text-[10px] font-medium uppercase tracking-wider text-on-surface-variant">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((order) => (
-              <tr
-                key={order.id}
-                className="cursor-pointer border-b border-border/70 last:border-0 hover:bg-muted/40"
-                onClick={() => navigate(`/orders/${order.id}`)}
-              >
-                <td className="px-3 py-3 font-mono text-xs">
-                  <Link to={`/orders/${order.id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
-                    {order.id}
-                  </Link>
-                </td>
-                <td className="px-3 py-3">
-                  <span className="flex items-center gap-2">
-                    <CompanyLogo name={order.company} domain={order.domain} size="sm" />
-                    <span>
-                      <span className="block font-medium">{order.company}</span>
-                      <span className="text-xs text-on-surface-variant">{order.ticker}</span>
+      <QueryStatus loading={loading && !data} error={error}>
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/40">
+                {['Order', 'Company', 'Type', 'Shares', 'Price', 'You pay / receive', 'Status', 'Placed'].map((h) => (
+                  <th key={h} className="px-3 py-2 font-mono text-[10px] font-medium uppercase tracking-wider text-on-surface-variant">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr
+                  key={order.id}
+                  className="cursor-pointer border-b border-border/70 last:border-0 hover:bg-muted/40"
+                  onClick={() => navigate(`/orders/${order.id}`)}
+                >
+                  <td className="px-3 py-3 font-mono text-xs">
+                    <Link to={`/orders/${order.id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
+                      {order.id}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-3">
+                    <span className="flex items-center gap-2">
+                      <CompanyLogo name={order.company} domain={order.domain} size="sm" />
+                      <span>
+                        <span className="block font-medium">{order.company}</span>
+                        <span className="text-xs text-on-surface-variant">{order.ticker}</span>
+                      </span>
                     </span>
-                  </span>
-                </td>
-                <td className={`px-3 py-3 font-medium ${order.side === 'BUY' ? 'text-bid' : 'text-ask'}`}>
-                  {order.side === 'BUY' ? 'Buy' : 'Sell'}
-                </td>
-                <td className="px-3 py-3 font-mono">{order.quantity.toLocaleString('en-IN')}</td>
-                <td className="px-3 py-3 font-mono">₹{order.price.toFixed(2)}</td>
-                <td className="px-3 py-3 font-mono">₹{order.total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</td>
-                <td className="px-3 py-3">
-                  <span className={`inline-flex rounded-md border px-2 py-0.5 text-xs ${statusClass(order.status)}`}>
-                    {STATUS_LABEL[order.status]}
-                  </span>
-                </td>
-                <td className="px-3 py-3 text-xs text-on-surface-variant">{formatWhen(order.placedAt)}</td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={8} className="px-3 py-12 text-center text-on-surface-variant">
-                  No orders match these filters.{' '}
-                  <button type="button" className="text-accent underline" onClick={() => navigate('/place-order')}>
-                    Place a new one
-                  </button>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                  </td>
+                  <td className={`px-3 py-3 font-medium ${order.side === 'BUY' ? 'text-bid' : 'text-ask'}`}>
+                    {order.side === 'BUY' ? 'Buy' : 'Sell'}
+                  </td>
+                  <td className="px-3 py-3 font-mono">{order.quantity.toLocaleString('en-IN')}</td>
+                  <td className="px-3 py-3 font-mono">₹{order.price.toFixed(2)}</td>
+                  <td className="px-3 py-3 font-mono">₹{order.total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</td>
+                  <td className="px-3 py-3">
+                    <span className={`inline-flex rounded-md border px-2 py-0.5 text-xs ${statusClass(order.status)}`}>
+                      {STATUS_LABEL[order.status]}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3 text-xs text-on-surface-variant">{formatWhen(order.placedAt)}</td>
+                </tr>
+              ))}
+              {orders.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-3 py-12 text-center text-on-surface-variant">
+                    No orders match these filters.{' '}
+                    <button type="button" className="text-accent underline" onClick={() => navigate('/place-order')}>
+                      Place a new one
+                    </button>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </QueryStatus>
     </div>
   );
 }
