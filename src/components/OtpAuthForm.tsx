@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Envelope, GoogleLogo, Phone } from '@phosphor-ic
 import { BrandLogo, Field, InlineNotice } from './ui';
 import { api, errorMessage } from '../api';
 import { safeNextPath, useAuth } from '../auth';
+import { authClient } from '../lib/auth-client';
 import posthog, { isPostHogConfigured } from '../posthog';
 
 type Channel = 'email' | 'mobile';
@@ -26,6 +27,7 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const [channel, setChannel] = useState<Channel>('email');
   const [step, setStep] = useState<Step>('identify');
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -112,15 +114,44 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
     otpRefs.current[Math.min(digits.length, 5)]?.focus();
   };
 
-  const onPasswordLogin = async (e: FormEvent) => {
+  const onPasswordAuth = async (e: FormEvent) => {
     e.preventDefault();
     if (!isValidEmail(email.trim()) || password.length < 8) {
       showError('Enter a valid email and a password of at least 8 characters.');
       return;
     }
+    if (isSignup && name.trim().length < 2) {
+      showError('Enter your name.');
+      return;
+    }
     setBusy(true);
     setError('');
     try {
+      if (isSignup) {
+        const { error } = await authClient.signUp.email({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        });
+        if (error) {
+          showError(error.message || 'Could not create the account.');
+          return;
+        }
+        if (isPostHogConfigured) posthog.capture('authentication_completed', { mode, method: 'better_auth_signup' });
+        navigate(next);
+        return;
+      }
+
+      const { error } = await authClient.signIn.email({
+        email: email.trim(),
+        password,
+      });
+      if (!error) {
+        if (isPostHogConfigured) posthog.capture('authentication_completed', { mode, method: 'better_auth' });
+        navigate(next);
+        return;
+      }
+
       const session = await api.login(email.trim(), password);
       finishAuth(session, 'password');
     } catch (err) {
@@ -142,7 +173,7 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
         <p className="mt-2 text-on-surface-variant">
           {step === 'identify'
             ? isSignup
-              ? 'Get a 6-digit OTP on email or mobile to create your account.'
+              ? 'Create your account with email and password, or get a 6-digit OTP.'
               : 'Log in with email and password, or get a 6-digit OTP.'
             : `Enter the 6-digit code sent to ${maskedTarget || 'you'}.`}
         </p>
@@ -175,8 +206,20 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
             Continue with Google
           </button>
 
-          {!isSignup ? (
-            <form className="flex flex-col gap-5" onSubmit={onPasswordLogin} noValidate>
+          <form className="flex flex-col gap-5" onSubmit={onPasswordAuth} noValidate>
+              {isSignup ? (
+                <Field id={`${fieldPrefix}-name`} label="Name">
+                  <input
+                    autoComplete="name"
+                    className="field"
+                    id={`${fieldPrefix}-name`}
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </Field>
+              ) : null}
               <Field id={`${fieldPrefix}-email`} label="Email" error={fieldError}>
                 <div className="relative">
                   <Envelope
@@ -199,7 +242,7 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
               </Field>
               <Field id={`${fieldPrefix}-password`} label="Password">
                 <input
-                  autoComplete="current-password"
+                  autoComplete={isSignup ? 'new-password' : 'current-password'}
                   className="field"
                   id={`${fieldPrefix}-password`}
                   type="password"
@@ -208,11 +251,10 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
                 />
               </Field>
               <button className="btn-primary w-full cursor-pointer py-3.5" type="submit" disabled={busy}>
-                {busy ? 'Logging in…' : 'Log in'}
+                {busy ? (isSignup ? 'Creating account…' : 'Logging in…') : isSignup ? 'Create account' : 'Log in'}
                 {busy ? null : <ArrowRight size={18} aria-hidden="true" />}
               </button>
             </form>
-          ) : null}
 
           <div className="flex items-center gap-3 text-xs text-on-surface-variant" role="separator">
             <span className="h-px flex-1 bg-outline-variant/50" />

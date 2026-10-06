@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { api, errorMessage } from './api';
 import { clearSession, hydrateTokensFromStorage, persistSession } from './api/client';
 import type { AuthSession, SessionUser } from './api/types';
+import { authClient } from './lib/auth-client';
 import posthog, { isPostHogConfigured } from './posthog';
 
 export type AuthUser = {
@@ -41,9 +42,21 @@ function identifyUser(user: AuthUser) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [ready, setReady] = useState(false);
+  const betterSession = authClient.useSession();
+  const [apiUser, setApiUser] = useState<AuthUser | null>(null);
+  const [apiReady, setApiReady] = useState(false);
   const identified = useRef(false);
+
+  const betterUser: AuthUser | null = betterSession.data?.user
+    ? {
+        id: betterSession.data.user.id,
+        email: betterSession.data.user.email,
+        name: betterSession.data.user.name?.trim() || betterSession.data.user.email.split('@')[0] || 'Investor',
+        mobile: null,
+      }
+    : null;
+  const user = betterUser ?? apiUser;
+  const ready = !betterSession.isPending && apiReady;
 
   useEffect(() => {
     let cancelled = false;
@@ -51,21 +64,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const bootstrap = async () => {
       if (!stored?.accessToken && !stored?.refreshToken) {
-        if (!cancelled) setReady(true);
+        if (!cancelled) setApiReady(true);
         return;
       }
       try {
         const me = await api.me();
         if (cancelled) return;
         const next = toAuthUser(me);
-        setUser(next);
+        setApiUser(next);
         identifyUser(next);
         identified.current = true;
       } catch {
         clearSession();
-        if (!cancelled) setUser(null);
+        if (!cancelled) setApiUser(null);
       } finally {
-        if (!cancelled) setReady(true);
+        if (!cancelled) setApiReady(true);
       }
     };
 
@@ -83,19 +96,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     identifyUser(next);
     identified.current = true;
-    setUser(next);
+    setApiUser(next);
   }, [user]);
 
   const logout = useCallback(async () => {
     try {
+      await authClient.signOut();
+    } catch {
+      // Better Auth session is cleared locally either way.
+    }
+    try {
       await api.logout();
     } catch {
-      // Session is cleared locally either way.
+      // API session is cleared locally either way.
     }
     clearSession();
     if (isPostHogConfigured) posthog.reset();
     identified.current = false;
-    setUser(null);
+    setApiUser(null);
   }, []);
 
   const value = useMemo(() => ({ user, ready, applySession, logout }), [user, ready, applySession, logout]);

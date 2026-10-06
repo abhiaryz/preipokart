@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -22,6 +22,53 @@ import { SiteFooter, SiteHeader } from '../components/PublicLayout';
 import { api } from '../api';
 import type { FaqItem, StockListItem } from '../api/types';
 import { useApi } from '../hooks/useApi';
+
+function PopIn({
+  children,
+  delay = 0,
+  className = '',
+  lift = true,
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+  lift?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<'wait' | 'play' | 'done'>('wait');
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setState('done');
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setState('play');
+        observer.disconnect();
+      },
+      { threshold: 0.18, rootMargin: '0px 0px -32px 0px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`card-pop ${state === 'play' ? 'card-pop-play' : ''} ${state === 'done' ? 'card-pop-done' : ''} ${lift ? 'card-pop-lift' : ''} ${className}`}
+      style={state === 'play' ? { animationDelay: `${delay}ms` } : undefined}
+      onAnimationEnd={(event) => {
+        if (event.target === event.currentTarget) setState('done');
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 const trustSignals = [
   { icon: Vault, title: 'Escrow protected', body: 'Funds stay with us until both sides complete the deal.' },
@@ -353,6 +400,7 @@ export default function Landing() {
 
               {/* Market preview card */}
               <div className="min-w-0">
+                <PopIn delay={80} className="h-full">
                 <div className="landing-market-card elevation-active overflow-hidden rounded-xl sm:rounded-2xl">
                   <div className="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-4 py-3 sm:items-center sm:px-5 sm:py-3.5">
                     <div className="min-w-0">
@@ -450,6 +498,7 @@ export default function Landing() {
                     </Link>
                   </div>
                 </div>
+                </PopIn>
               </div>
             </div>
           </div>
@@ -466,8 +515,9 @@ export default function Landing() {
             ))}
           </dl>
           <div className="mx-auto grid max-w-[1400px] gap-8 px-4 py-10 sm:grid-cols-3 sm:px-6 lg:px-8">
-            {trustSignals.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="flex gap-4">
+            {trustSignals.map(({ icon: Icon, title, body }, index) => (
+              <PopIn key={title} delay={index * 90}>
+              <div className="flex gap-4">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-outline-variant/40 bg-card">
                   <Icon className="text-primary" size={20} aria-hidden="true" />
                 </span>
@@ -476,6 +526,7 @@ export default function Landing() {
                   <p className="mt-1.5 text-sm leading-relaxed text-on-surface-variant">{body}</p>
                 </div>
               </div>
+              </PopIn>
             ))}
           </div>
         </section>
@@ -496,7 +547,8 @@ export default function Landing() {
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <li key={step.title} className="relative">
+                <li key={step.title} className="relative h-full">
+                  <PopIn delay={index * 100} className="h-full">
                   <article className="card group h-full p-6 transition duration-200 hover:border-primary-container/30">
                     <div className="flex items-center gap-3">
                       <span className="flex h-8 w-8 items-center justify-center rounded-full border border-primary-container/30 bg-primary-container/10 font-data-md text-sm text-primary">
@@ -514,6 +566,7 @@ export default function Landing() {
                     <h3 className="mt-4 font-headline-sm text-xl">{step.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{step.body}</p>
                   </article>
+                  </PopIn>
                 </li>
               );
             })}
@@ -530,12 +583,12 @@ export default function Landing() {
             />
 
             <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => {
+              {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
+                  <PopIn key={feature.title} delay={(index % 3) * 80} className={`h-full ${feature.span}`}>
                   <article
-                    key={feature.title}
-                    className={`card group p-6 transition duration-200 hover:border-primary-container/25 ${feature.span}`}
+                    className="card group h-full p-6 transition duration-200 hover:border-primary-container/25"
                   >
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant/40 bg-surface-container-low">
                       <Icon className="text-primary" size={22} aria-hidden="true" />
@@ -543,6 +596,7 @@ export default function Landing() {
                     <h3 className="mt-5 font-headline-sm text-xl">{feature.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{feature.body}</p>
                   </article>
+                  </PopIn>
                 );
               })}
             </div>
@@ -564,8 +618,9 @@ export default function Landing() {
           </div>
 
           <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {listedCompanies.map((company) => (
-              <li key={company.id}>
+            {listedCompanies.map((company, index) => (
+              <li key={company.id} className="h-full">
+                <PopIn delay={(index % 4) * 70} className="h-full">
                 <Link
                   to={`/stocks/${company.id}`}
                   className="card group flex h-full flex-col gap-4 p-4 transition duration-200 hover:border-primary-container/35 hover:bg-surface-container-low/40"
@@ -590,6 +645,7 @@ export default function Landing() {
                     </span>
                   </div>
                 </Link>
+                </PopIn>
               </li>
             ))}
           </ul>
@@ -626,6 +682,7 @@ export default function Landing() {
             />
 
             <div>
+              <PopIn lift={false}>
               <div className="divide-y divide-outline-variant/40 rounded-2xl border border-outline-variant/45 bg-card/50">
                 {landingFaqs.map((item) => (
                   <details key={item.id} className="group px-5 py-1 first:pt-0 last:pb-0">
@@ -645,6 +702,7 @@ export default function Landing() {
                   </details>
                 ))}
               </div>
+              </PopIn>
               <Link to="/faq" className="btn-secondary mt-6 inline-flex min-h-11">
                 See all FAQs
                 <ArrowRight size={16} aria-hidden="true" />
@@ -656,6 +714,7 @@ export default function Landing() {
         {/* Final CTA */}
         <section className="border-t border-outline-variant/40">
           <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8">
+            <PopIn lift={false}>
             <div className="landing-cta-card relative overflow-hidden rounded-2xl border border-outline-variant/50 p-8 md:p-12 lg:p-14">
               <div className="pointer-events-none absolute inset-0 landing-cta-glow" aria-hidden="true" />
               <div className="relative flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -680,6 +739,7 @@ export default function Landing() {
                 </div>
               </div>
             </div>
+            </PopIn>
           </div>
         </section>
       </main>
