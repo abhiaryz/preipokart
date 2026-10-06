@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Bell,
   BookOpenText,
@@ -56,15 +56,35 @@ const accountNav = [
   { to: '/help', label: 'Help', icon: Lifebuoy },
 ];
 
-function Logo() {
+function Logo({ compact = false }: { compact?: boolean }) {
   return (
-    <Link to="/dashboard" className="flex flex-col items-start gap-1" aria-label="Preipokart home">
-      <BrandLogo />
-      <span className="text-[11px] font-medium tracking-wide text-on-surface-variant">
-        Pre-IPO marketplace
-      </span>
+    <Link
+      to="/dashboard"
+      className={`flex min-w-0 items-center ${compact ? '' : 'flex-col items-start gap-1'}`}
+      aria-label="Preipokart home"
+    >
+      <BrandLogo className={compact ? 'h-6' : 'h-7'} />
+      {compact ? null : (
+        <span className="text-[11px] font-medium tracking-wide text-on-surface-variant">
+          Pre-IPO marketplace
+        </span>
+      )}
     </Link>
   );
+}
+
+function isNavActive(to: string, pathname: string) {
+  if (to === '/orders' && pathname.startsWith('/place-order')) return true;
+  if (
+    to === '/explore/screener' &&
+    (pathname.startsWith('/explore') || pathname.startsWith('/stocks'))
+  ) {
+    return true;
+  }
+  if (to === '/blog' && pathname.startsWith('/blog')) return true;
+  if (to === '/faq' && pathname.startsWith('/faq')) return true;
+  if (to === '/dashboard') return pathname === '/dashboard' || pathname === '/';
+  return pathname === to || pathname.startsWith(`${to}/`);
 }
 
 function NavList({
@@ -77,86 +97,168 @@ function NavList({
   const location = useLocation();
   return (
     <div className="flex flex-col gap-1">
-      {items.map(({ to, label, icon: Icon }) => (
-        <NavLink
-          key={to}
-          to={to}
-          onClick={onNavigate}
-          className={({ isActive }) => {
-            const active =
-              isActive ||
-              (to === '/orders' && location.pathname.startsWith('/place-order')) ||
-              (to === '/explore/screener' &&
-                (location.pathname.startsWith('/explore') || location.pathname.startsWith('/stocks'))) ||
-              (to === '/blog' && location.pathname.startsWith('/blog')) ||
-              (to === '/faq' && location.pathname.startsWith('/faq'));
-            return `flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition duration-200 ${
+      {items.map(({ to, label, icon: Icon }) => {
+        const active = isNavActive(to, location.pathname);
+        return (
+          <NavLink
+            key={to}
+            to={to}
+            onClick={onNavigate}
+            className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 ${
               active
                 ? 'nav-active'
                 : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-            }`;
-          }}
-        >
-          <Icon size={18} weight="duotone" className="shrink-0 text-primary" aria-hidden="true" />
-          {label}
-        </NavLink>
-      ))}
+            }`}
+          >
+            <Icon size={18} weight="duotone" className="shrink-0 text-primary" aria-hidden="true" />
+            {label}
+          </NavLink>
+        );
+      })}
     </div>
   );
 }
 
 export default function AppShell() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
+  useEffect(() => {
+    close();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   const menu = (
     <>
-      <p className="mb-2 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">Browse</p>
+      <p className="mb-2 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
+        Browse
+      </p>
       <NavList items={primaryNav} onNavigate={close} />
-      <p className="mb-2 mt-5 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">Raise</p>
+      <p className="mb-2 mt-5 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
+        Raise
+      </p>
       <NavList items={raiseNav} onNavigate={close} />
-      <p className="mb-2 mt-5 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">Account</p>
+      <p className="mb-2 mt-5 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
+        Account
+      </p>
       <NavList items={accountNav} onNavigate={close} />
     </>
   );
 
   return (
     <div className="min-h-[100dvh] bg-canvas text-on-surface">
-      <header className="fixed top-0 z-nav flex h-14 w-full items-center gap-3 border-b border-on-surface/10 bg-surface/90 px-4 backdrop-blur-xl md:hidden">
-        <Logo />
-        <GlobalNavSearch className="min-w-0 flex-1" compact />
-        <button
-          type="button"
-          className="btn-ghost min-h-11 min-w-11 shrink-0"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X size={22} aria-hidden="true" /> : <List size={22} aria-hidden="true" />}
-        </button>
-      </header>
-
-      {open && (
-        <div id="mobile-nav" className="fixed inset-x-0 top-14 z-overlay max-h-[80vh] overflow-y-auto border-b border-on-surface/10 bg-card p-4 md:hidden">
-          {menu}
+      {/* Mobile top bar */}
+      <header className="fixed inset-x-0 top-0 z-nav border-b border-outline-variant/40 bg-surface/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl md:hidden">
+        <div className="flex h-14 items-center gap-2 px-3">
+          <Logo compact />
+          <GlobalNavSearch className="min-w-0 flex-1" compact />
+          <Link
+            to="/notifications"
+            className="btn-ghost min-h-10 min-w-10 shrink-0"
+            aria-label="Alerts"
+          >
+            <Bell size={20} weight="duotone" aria-hidden="true" />
+          </Link>
           <button
             type="button"
-            className="btn-ghost mt-3 w-full justify-start"
-            onClick={() => {
-              logout();
-              close();
-              navigate('/');
-            }}
+            className="btn-ghost min-h-10 min-w-10 shrink-0"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            onClick={() => setOpen((v) => !v)}
           >
-            <SignOut size={18} aria-hidden="true" />
-            Log out
+            {open ? <X size={22} aria-hidden="true" /> : <List size={22} aria-hidden="true" />}
           </button>
         </div>
-      )}
+      </header>
 
+      {/* Mobile drawer + backdrop */}
+      {open ? (
+        <div className="fixed inset-0 z-overlay md:hidden" id="mobile-nav-root">
+          <button
+            type="button"
+            className="absolute inset-0 bg-on-surface/40 backdrop-blur-[2px]"
+            aria-label="Close menu"
+            onClick={close}
+          />
+          <div
+            id="mobile-nav"
+            className="absolute inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] flex max-h-[min(78dvh,36rem)] flex-col overflow-hidden rounded-b-2xl border-b border-outline-variant/40 bg-card shadow-lg"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+          >
+            <div className="border-b border-outline-variant/30 px-4 py-3">
+              <p className="truncate text-sm font-medium text-on-surface">{user?.name ?? 'Account'}</p>
+              <p className="truncate text-xs text-on-surface-variant">{user?.email}</p>
+            </div>
+            <div className="flex-1 overflow-y-auto overscroll-contain p-4 pb-6">{menu}</div>
+            <div className="border-t border-outline-variant/30 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <button
+                type="button"
+                className="btn-ghost min-h-11 w-full justify-start text-error"
+                onClick={() => {
+                  logout();
+                  close();
+                  navigate('/');
+                }}
+              >
+                <SignOut size={18} aria-hidden="true" />
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Mobile bottom tabs */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-nav border-t border-outline-variant/40 bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
+        aria-label="Primary"
+      >
+        <ul className="grid h-16 grid-cols-4">
+          {primaryNav.map(({ to, label, icon: Icon }) => {
+            const active = isNavActive(to, location.pathname);
+            return (
+              <li key={to} className="min-w-0">
+                <NavLink
+                  to={to}
+                  className={`flex h-full flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium transition-colors ${
+                    active ? 'text-primary' : 'text-on-surface-variant'
+                  }`}
+                >
+                  <span
+                    className={`flex h-8 w-12 items-center justify-center rounded-full transition-colors ${
+                      active ? 'bg-primary/10' : ''
+                    }`}
+                  >
+                    <Icon size={22} weight={active ? 'fill' : 'duotone'} aria-hidden="true" />
+                  </span>
+                  <span className="truncate">{label}</span>
+                </NavLink>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* Desktop sidebar */}
       <aside className="fixed left-0 top-0 z-nav hidden h-full w-64 flex-col border-r border-outline-variant/40 bg-surface-container-lowest px-4 py-5 md:flex">
         <Logo />
         <GlobalNavSearch className="mt-5" />
@@ -178,8 +280,8 @@ export default function AppShell() {
         </div>
       </aside>
 
-      <main className="min-h-[100dvh] pt-16 md:ml-64 md:pt-0">
-        <div className="mx-auto w-full max-w-[1440px] px-4 py-6 md:px-8 md:py-8">
+      <main className="min-h-[100dvh] pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:ml-64 md:pb-0 md:pt-0">
+        <div className="mx-auto w-full max-w-[1440px] px-4 py-5 sm:px-5 md:px-8 md:py-8">
           <Outlet />
         </div>
       </main>

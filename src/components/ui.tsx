@@ -12,16 +12,18 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <header className="mb-5 flex flex-col gap-3 sm:mb-6 sm:gap-4 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0">
-        <h1 className="font-headline-md text-[28px] tracking-tight text-on-surface md:text-headline-md">
+        <h1 className="font-headline-md text-[1.5rem] tracking-tight text-on-surface sm:text-[28px] md:text-headline-md">
           {title}
         </h1>
         {description ? (
-          <p className="mt-1 max-w-[65ch] font-body-md text-body-md text-on-surface-variant">{description}</p>
+          <p className="mt-1 max-w-[65ch] text-sm text-on-surface-variant sm:font-body-md sm:text-body-md">
+            {description}
+          </p>
         ) : null}
       </div>
-      {actions ? <div className="flex shrink-0 items-center gap-3">{actions}</div> : null}
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2 sm:gap-3">{actions}</div> : null}
     </header>
   );
 }

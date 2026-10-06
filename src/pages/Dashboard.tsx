@@ -73,15 +73,15 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <header className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Home</h1>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Home</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             See how pre-IPO companies are trading today. Pause updates if the numbers move too fast.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="relative">
+          <label className="relative hidden min-w-0 flex-1 sm:block md:flex-none">
             <span className="sr-only">Search markets</span>
             <MagnifyingGlass size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <input
@@ -93,12 +93,13 @@ export default function Dashboard() {
           </label>
           <button
             type="button"
-            className="btn-secondary min-h-11"
+            className="btn-secondary min-h-11 flex-1 sm:flex-none"
             aria-pressed={live}
             onClick={() => setLive((v) => !v)}
           >
             {live ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
-            {live ? 'Pause live prices' : 'Resume live prices'}
+            <span className="sm:hidden">{live ? 'Pause' : 'Live'}</span>
+            <span className="hidden sm:inline">{live ? 'Pause live prices' : 'Resume live prices'}</span>
           </button>
           <div className="relative">
             <button

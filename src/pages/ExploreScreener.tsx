@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CaretDown, CaretUp, MagnifyingGlass } from '@phosphor-icons/react';
+import { CaretDown, CaretUp, MagnifyingGlass, TrendDown, TrendUp } from '@phosphor-icons/react';
 import { CompanyLogo, PageHeader, QueryStatus } from '../components/ui';
 import { ExploreViewSwitch } from '../components/ExploreViewSwitch';
 import { api } from '../api';
@@ -265,77 +265,128 @@ export default function ExploreScreener() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-outline-variant/40" aria-busy={loading}>
-            <table className="w-full min-w-[920px] border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-outline-variant/40 bg-surface-container-low/60 text-on-surface-variant">
-                  {columns.map((col) => {
-                    const active = sortKey === col.key;
-                    return (
-                      <th
-                        key={col.key}
-                        scope="col"
-                        className={`py-2.5 pl-3 pr-2 font-label-caps text-[11px] uppercase ${
-                          col.align === 'right' ? 'text-right' : 'text-left'
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => onSort(col.key)}
-                          className={`inline-flex items-center gap-1 hover:text-on-surface ${
-                            col.align === 'right' ? 'ml-auto' : ''
-                          } ${active ? 'text-on-surface' : ''}`}
-                        >
-                          {col.label}
-                          {active ? (
-                            sortDir === 'asc' ? (
-                              <CaretUp size={12} aria-hidden="true" />
-                            ) : (
-                              <CaretDown size={12} aria-hidden="true" />
-                            )
-                          ) : null}
-                        </button>
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((stock) => (
-                  <tr
-                    key={stock.id}
-                    className="cursor-pointer border-b border-outline-variant/25 transition-colors hover:bg-on-surface/[0.03]"
-                    onClick={() => navigate(`/stocks/${stock.id}`)}
-                  >
-                    <td className="py-2.5 pl-3 pr-2">
-                      <div className="flex items-center gap-2.5">
-                        <CompanyLogo name={stock.name} domain={stock.domain} size="sm" />
-                        <div className="min-w-0">
-                          <p className="truncate font-medium leading-tight">{stock.name}</p>
-                          <p className="font-data-sm text-xs text-on-surface-variant">{stock.ticker}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-2.5 pr-2 text-on-surface-variant">{stock.sector}</td>
-                    <td className="py-2.5 pr-2 text-right font-data-sm">
-                      ₹{stock.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-                    </td>
-                    <td
-                      className={`py-2.5 pr-2 text-right font-data-sm ${
-                        stock.change >= 0 ? 'text-bid' : 'text-ask'
+          <>
+            {/* Mobile: cards always */}
+            <div className="grid grid-cols-1 gap-widget-gap sm:grid-cols-2 md:hidden" aria-busy={loading}>
+              {filtered.map((stock) => (
+                <button
+                  key={stock.id}
+                  type="button"
+                  onClick={() => navigate(`/stocks/${stock.id}`)}
+                  className="elevation-widget flex flex-col gap-4 rounded-xl p-5 text-left transition duration-200 active:scale-[0.99]"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <CompanyLogo name={stock.name} domain={stock.domain} />
+                    <span
+                      className={`inline-flex items-center gap-1 rounded px-2 py-1 font-label-caps text-label-caps ${
+                        stock.change >= 0
+                          ? 'bg-secondary-container/10 text-secondary-container'
+                          : 'bg-error-container/25 text-error'
                       }`}
                     >
-                      {stock.change >= 0 ? '+' : ''}
-                      {stock.change.toFixed(2)}%
-                    </td>
-                    <td className="py-2.5 pr-2 text-right font-data-sm">{stock.impliedVal ?? '—'}</td>
-                    <td className="py-2.5 pr-2 text-on-surface-variant">{stock.lockup ?? '—'}</td>
-                    <td className="py-2.5 pr-3 text-on-surface-variant">{stock.series ?? '—'}</td>
+                      {stock.change >= 0 ? (
+                        <TrendUp size={14} aria-hidden="true" />
+                      ) : (
+                        <TrendDown size={14} aria-hidden="true" />
+                      )}
+                      {Math.abs(stock.change)}%
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="font-headline-sm text-xl text-on-surface">{stock.name}</h2>
+                    <p className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+                      {stock.ticker} · {stock.sector}
+                    </p>
+                  </div>
+                  <div className="mt-auto grid grid-cols-2 gap-3 border-t border-on-surface/10 pt-4">
+                    <div>
+                      <p className="font-data-lg text-data-lg text-on-surface">
+                        ₹{stock.price.toLocaleString('en-IN')}
+                      </p>
+                      <p className="font-label-caps text-label-caps uppercase text-on-surface-variant">Last traded</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-data-sm text-sm text-on-surface">{stock.impliedVal ?? '—'}</p>
+                      <p className="font-label-caps text-label-caps uppercase text-on-surface-variant">Implied val</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Desktop: dense table */}
+            <div className="hidden overflow-x-auto rounded-xl border border-outline-variant/40 md:block" aria-busy={loading}>
+              <table className="w-full min-w-[920px] border-collapse text-left text-sm">
+                <thead>
+                  <tr className="border-b border-outline-variant/40 bg-surface-container-low/60 text-on-surface-variant">
+                    {columns.map((col) => {
+                      const active = sortKey === col.key;
+                      return (
+                        <th
+                          key={col.key}
+                          scope="col"
+                          className={`py-2.5 pl-3 pr-2 font-label-caps text-[11px] uppercase ${
+                            col.align === 'right' ? 'text-right' : 'text-left'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => onSort(col.key)}
+                            className={`inline-flex items-center gap-1 hover:text-on-surface ${
+                              col.align === 'right' ? 'ml-auto' : ''
+                            } ${active ? 'text-on-surface' : ''}`}
+                          >
+                            {col.label}
+                            {active ? (
+                              sortDir === 'asc' ? (
+                                <CaretUp size={12} aria-hidden="true" />
+                              ) : (
+                                <CaretDown size={12} aria-hidden="true" />
+                              )
+                            ) : null}
+                          </button>
+                        </th>
+                      );
+                    })}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filtered.map((stock) => (
+                    <tr
+                      key={stock.id}
+                      className="cursor-pointer border-b border-outline-variant/25 transition-colors hover:bg-on-surface/[0.03]"
+                      onClick={() => navigate(`/stocks/${stock.id}`)}
+                    >
+                      <td className="py-2.5 pl-3 pr-2">
+                        <div className="flex items-center gap-2.5">
+                          <CompanyLogo name={stock.name} domain={stock.domain} size="sm" />
+                          <div className="min-w-0">
+                            <p className="truncate font-medium leading-tight">{stock.name}</p>
+                            <p className="font-data-sm text-xs text-on-surface-variant">{stock.ticker}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-2.5 pr-2 text-on-surface-variant">{stock.sector}</td>
+                      <td className="py-2.5 pr-2 text-right font-data-sm">
+                        ₹{stock.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                      </td>
+                      <td
+                        className={`py-2.5 pr-2 text-right font-data-sm ${
+                          stock.change >= 0 ? 'text-bid' : 'text-ask'
+                        }`}
+                      >
+                        {stock.change >= 0 ? '+' : ''}
+                        {stock.change.toFixed(2)}%
+                      </td>
+                      <td className="py-2.5 pr-2 text-right font-data-sm">{stock.impliedVal ?? '—'}</td>
+                      <td className="py-2.5 pr-2 text-on-surface-variant">{stock.lockup ?? '—'}</td>
+                      <td className="py-2.5 pr-3 text-on-surface-variant">{stock.series ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </QueryStatus>
     </div>
