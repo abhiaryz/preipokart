@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import wordmark from '../assets/preipokart-wordmark.png';
 import { logoUrl } from '../lib/format';
 
 export function PageHeader({
@@ -22,6 +23,12 @@ export function PageHeader({
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-3">{actions}</div> : null}
     </header>
+  );
+}
+
+export function BrandLogo({ className = 'h-7' }: { className?: string }) {
+  return (
+    <img src={wordmark} alt="Preipokart" className={`${className} w-auto`} />
   );
 }
 

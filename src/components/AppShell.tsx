@@ -16,7 +16,7 @@ import {
   UserCircle,
   X,
 } from '@phosphor-icons/react';
-import { LetterMark } from './ui';
+import { BrandLogo } from './ui';
 import { useAuth } from '../auth';
 
 const primaryNav = [
@@ -38,13 +38,10 @@ const accountNav = [
 
 function Logo() {
   return (
-    <Link to="/dashboard" className="flex items-center gap-2.5">
-      <LetterMark label="PreIPOKart" size="sm" />
-      <span>
-        <span className="block text-sm font-semibold tracking-tight text-primary">PreIPOKart</span>
-        <span className="block text-[11px] font-medium tracking-wide text-on-surface-variant">
-          Pre-IPO marketplace
-        </span>
+    <Link to="/dashboard" className="flex flex-col items-start gap-1" aria-label="Preipokart home">
+      <BrandLogo />
+      <span className="text-[11px] font-medium tracking-wide text-on-surface-variant">
+        Pre-IPO marketplace
       </span>
     </Link>
   );

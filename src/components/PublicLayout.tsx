@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { ArrowRight, List, X } from '@phosphor-icons/react';
-import { LetterMark } from './ui';
+import { BrandLogo } from './ui';
 import { api } from '../api';
 import { useAuth } from '../auth';
 import { useApi } from '../hooks/useApi';
@@ -38,9 +38,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-nav border-b border-outline-variant/40 bg-canvas/90 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex min-h-11 items-center gap-2.5 rounded-lg">
-          <LetterMark label="PreIPOKart" size="sm" />
-          <span className="text-sm font-semibold tracking-tight text-primary">PreIPOKart</span>
+        <Link to="/" className="flex min-h-11 items-center rounded-lg" aria-label="Preipokart home">
+          <BrandLogo />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Page">
@@ -106,9 +105,8 @@ export function SiteFooter() {
     <footer className="border-t border-outline-variant/40">
       <div className="mx-auto grid max-w-[1400px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.1fr_2fr] lg:px-8">
         <div>
-          <Link to="/" className="inline-flex items-center gap-2.5">
-            <LetterMark label="PreIPOKart" size="sm" />
-            <span className="text-sm font-semibold tracking-tight text-primary">PreIPOKart</span>
+          <Link to="/" className="inline-flex items-center" aria-label="Preipokart home">
+            <BrandLogo />
           </Link>
           <p className="mt-3 max-w-[36ch] text-sm text-on-surface-variant">
             Dummy request book for unlisted shares in India. Not a live exchange. Unlisted equity is risky and may be illiquid.
@@ -194,7 +192,7 @@ export default function PublicLayout() {
     <div className="min-h-[100dvh] bg-canvas text-on-surface">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-modal focus:rounded-lg focus:bg-primary-container focus:px-3 focus:py-2 focus:text-on-primary-container"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-modal focus:rounded-lg focus:bg-[#0F4A3D] focus:px-3 focus:py-2 focus:text-white"
       >
         Skip to content
       </a>

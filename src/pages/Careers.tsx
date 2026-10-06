@@ -44,7 +44,7 @@ export default function Careers() {
                 onClick={() => setTeam(tab.id)}
                 className={`min-h-9 shrink-0 cursor-pointer whitespace-nowrap rounded-lg px-3 font-label-caps text-[11px] uppercase transition-colors ${
                   pressed
-                    ? 'bg-primary-container text-on-primary-container'
+                    ? 'bg-[#0F4A3D] text-white'
                     : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
                 }`}
               >

@@ -70,7 +70,7 @@ export default function IPOs() {
               onClick={() => setFilter(tab.id)}
               className={`min-h-9 whitespace-nowrap rounded-lg px-3 font-label-caps text-[11px] uppercase transition-colors ${
                 filter === tab.id
-                  ? 'bg-primary-container text-on-primary-container'
+                  ? 'bg-[#0F4A3D] text-white'
                   : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
               }`}
             >

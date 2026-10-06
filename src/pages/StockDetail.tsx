@@ -69,7 +69,7 @@ function PriceChart({ stock }: { stock: StockDetailType }) {
                 }}
                 className={`min-h-9 rounded-lg px-3 font-label-caps text-[11px] uppercase ${
                   range === r
-                    ? 'bg-primary-container text-on-primary-container'
+                    ? 'bg-[#0F4A3D] text-white'
                     : 'text-on-surface-variant hover:bg-on-surface/5'
                 }`}
               >
@@ -301,7 +301,7 @@ export default function StockDetail() {
                       onClick={() => setYearIndex(i)}
                       className={`min-h-9 rounded-lg px-3 font-label-caps text-[11px] uppercase ${
                         yearIndex === i
-                          ? 'bg-primary-container text-on-primary-container'
+                          ? 'bg-[#0F4A3D] text-white'
                           : 'text-on-surface-variant hover:bg-on-surface/5'
                       }`}
                     >

@@ -65,7 +65,7 @@ export default function Faq() {
               onClick={() => setCategory(tab.id)}
               className={`min-h-11 shrink-0 cursor-pointer whitespace-nowrap rounded-lg px-3 text-sm font-medium transition duration-200 ${
                 pressed
-                  ? 'bg-primary-container text-on-primary-container'
+                  ? 'bg-[#0F4A3D] text-white'
                   : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
               }`}
             >

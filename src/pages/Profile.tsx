@@ -231,7 +231,7 @@ export default function Profile() {
               aria-selected={tab === item.id}
               className={`min-h-10 cursor-pointer whitespace-nowrap rounded-md px-3 text-sm font-medium transition duration-200 ${
                 tab === item.id
-                  ? 'bg-primary-container text-on-primary-container'
+                  ? 'bg-[#0F4A3D] text-white'
                   : 'text-on-surface-variant hover:text-on-surface'
               }`}
               onClick={() => setTab(item.id)}

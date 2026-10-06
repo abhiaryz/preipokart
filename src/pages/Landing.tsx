@@ -296,7 +296,7 @@ export default function Landing() {
     <div className="min-h-[100dvh] bg-canvas text-on-surface">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-modal focus:rounded-lg focus:bg-primary-container focus:px-3 focus:py-2 focus:text-on-primary-container"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-modal focus:rounded-lg focus:bg-[#0F4A3D] focus:px-3 focus:py-2 focus:text-white"
       >
         Skip to content
       </a>

@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Envelope, GoogleLogo, Phone } from '@phosphor-icons/react';
-import { Field, InlineNotice, LetterMark } from './ui';
+import { BrandLogo, Field, InlineNotice } from './ui';
 import { api, errorMessage } from '../api';
 import { safeNextPath, useAuth } from '../auth';
 import posthog, { isPostHogConfigured } from '../posthog';
@@ -133,9 +133,8 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
   return (
     <>
       <div className="mb-8">
-        <Link to="/" className="mb-5 flex items-center gap-3 rounded-lg lg:hidden">
-          <LetterMark label="PreIPOKart" size="sm" />
-          <span className="text-sm font-semibold tracking-tight text-primary">PreIPOKart</span>
+        <Link to="/" className="mb-5 inline-flex rounded-lg lg:hidden" aria-label="Preipokart home">
+          <BrandLogo />
         </Link>
         <h1 className="font-headline-md text-[28px] tracking-tight text-on-surface">
           {isSignup ? 'Create an account' : 'Log in'}
@@ -237,7 +236,7 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
                   aria-pressed={channel === id}
                   className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-medium transition duration-200 ${
                     channel === id
-                      ? 'bg-primary-container text-on-primary-container'
+                      ? 'bg-[#0F4A3D] text-white'
                       : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
                   }`}
                   onClick={() => {

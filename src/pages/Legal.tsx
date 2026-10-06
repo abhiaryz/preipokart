@@ -83,7 +83,7 @@ export default function Legal() {
                             to={`/legal/${item.slug}`}
                             className={`flex min-h-11 cursor-pointer items-center rounded-lg px-3 text-sm transition duration-200 ${
                               active
-                                ? 'bg-primary-container text-on-primary-container'
+                                ? 'bg-[#0F4A3D] text-white'
                                 : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                             }`}
                           >

@@ -88,7 +88,7 @@ export default function Orders() {
             type="button"
             aria-pressed={status === item.id}
             className={`min-h-9 cursor-pointer whitespace-nowrap rounded-lg px-3 text-sm ${
-              status === item.id ? 'bg-primary-container text-on-primary-container' : 'bg-card text-on-surface-variant'
+              status === item.id ? 'bg-[#0F4A3D] text-white' : 'bg-card text-on-surface-variant'
             }`}
             onClick={() => setStatus(item.id)}
           >

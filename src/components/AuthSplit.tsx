@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { LetterMark } from './ui';
+import { BrandLogo } from './ui';
 
 export function AuthSplit({ children }: { children: ReactNode }) {
   return (
@@ -17,9 +17,8 @@ export function AuthSplit({ children }: { children: ReactNode }) {
           />
           <div className="absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-primary-container/20 blur-[120px]" />
         </div>
-        <Link to="/" className="relative z-10 flex items-center gap-3 rounded-lg">
-          <LetterMark label="PreIPOKart" />
-          <span className="font-headline-sm text-xl tracking-tight text-primary">PreIPOKart</span>
+        <Link to="/" className="relative z-10 inline-flex rounded-lg" aria-label="Preipokart home">
+          <BrandLogo className="h-8" />
         </Link>
         <div className="relative z-10 max-w-lg">
           <h1 className="font-display-lg text-[40px] leading-[1.12] tracking-tight text-on-surface lg:text-display-lg">

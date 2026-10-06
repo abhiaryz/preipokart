@@ -50,7 +50,7 @@ export default function Explore() {
               onClick={() => setSortBy(mode)}
               className={`min-h-9 flex-1 rounded-lg px-3 font-label-caps text-[10px] uppercase transition-colors sm:flex-none ${
                 sortBy === mode
-                  ? 'bg-primary-container text-on-primary-container'
+                  ? 'bg-[#0F4A3D] text-white'
                   : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
@@ -68,7 +68,7 @@ export default function Explore() {
             onClick={() => setSelectedSector(sec)}
             className={`min-h-9 whitespace-nowrap rounded-lg px-3 font-label-caps text-[11px] uppercase transition-colors ${
               selectedSector === sec
-                ? 'bg-primary-container text-on-primary-container'
+                ? 'bg-[#0F4A3D] text-white'
                 : 'text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface'
             }`}
           >
