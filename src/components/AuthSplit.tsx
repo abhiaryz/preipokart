@@ -4,19 +4,17 @@ import { BrandLogo } from './ui';
 
 export function AuthSplit({ children }: { children: ReactNode }) {
   return (
-    <div className="relative grid min-h-[100dvh] bg-canvas text-on-surface lg:grid-cols-[1.05fr_0.95fr]">
-      <section className="relative hidden overflow-hidden border-r border-on-surface/10 px-12 py-16 lg:flex lg:flex-col lg:justify-between">
-        <div className="pointer-events-none absolute inset-0 opacity-40" aria-hidden="true">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgb(var(--color-on-surface) / 0.06) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--color-on-surface) / 0.06) 1px, transparent 1px)',
-              backgroundSize: '48px 48px',
-            }}
-          />
-          <div className="absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-primary-container/20 blur-[120px]" />
-        </div>
+    <div className="relative grid min-h-[100dvh] overflow-hidden bg-canvas text-on-surface lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="auth-orb auth-orb-a" />
+        <div className="auth-orb auth-orb-b" />
+        <div className="auth-orb auth-orb-c" />
+        <div className="auth-grid" />
+        <span className="auth-mark auth-mark-1" />
+        <span className="auth-mark auth-mark-2" />
+        <span className="auth-mark auth-mark-3" />
+      </div>
+      <section className="relative z-10 hidden overflow-hidden border-r border-on-surface/10 px-12 py-16 lg:flex lg:flex-col lg:justify-between">
         <Link to="/" className="relative z-10 inline-flex rounded-lg" aria-label="Preipokart home">
           <BrandLogo className="h-8" />
         </Link>
@@ -31,8 +29,8 @@ export function AuthSplit({ children }: { children: ReactNode }) {
         <p className="relative z-10 text-sm text-on-surface-variant">Trusted by everyday investors across India</p>
       </section>
 
-      <section className="flex items-center justify-center px-4 py-10 md:px-10">
-        <div className="elevation-active w-full max-w-[420px] rounded-xl p-7 md:p-8">{children}</div>
+      <section className="relative z-10 flex min-h-[100dvh] items-center justify-center px-6 py-10 md:px-16">
+        <div className="w-full max-w-[420px]">{children}</div>
       </section>
     </div>
   );

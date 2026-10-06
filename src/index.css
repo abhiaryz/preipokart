@@ -332,6 +332,135 @@
     transform: translateY(-4px);
   }
 
+  .auth-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(70px);
+    will-change: transform;
+  }
+
+  .auth-orb-a {
+    top: -8%;
+    left: -6%;
+    height: 420px;
+    width: 420px;
+    background: rgb(110 224 164 / 0.55);
+    animation: auth-drift-a 16s ease-in-out infinite;
+  }
+
+  .auth-orb-b {
+    right: 8%;
+    bottom: -12%;
+    height: 380px;
+    width: 380px;
+    background: rgb(200 156 91 / 0.38);
+    animation: auth-drift-b 20s ease-in-out infinite;
+  }
+
+  .auth-orb-c {
+    top: 38%;
+    left: 28%;
+    height: 260px;
+    width: 260px;
+    background: rgb(15 74 61 / 0.16);
+    animation: auth-drift-a 22s ease-in-out infinite reverse;
+  }
+
+  .auth-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgb(15 23 42 / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(15 23 42 / 0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: auth-grid-shift 18s linear infinite;
+  }
+
+  @media (min-width: 1024px) {
+    .auth-grid {
+      mask-image: linear-gradient(90deg, #000 0%, #000 42%, transparent 72%);
+    }
+  }
+
+  .auth-mark {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-right: 11px solid transparent;
+    border-bottom: 19px solid #c89c5b;
+    border-left: 11px solid transparent;
+    opacity: 0.55;
+    animation: auth-float 10s ease-in-out infinite;
+  }
+
+  .auth-mark-1 {
+    top: 8%;
+    left: 6%;
+  }
+
+  .auth-mark-2 {
+    bottom: 10%;
+    left: 8%;
+    animation-delay: -3.5s;
+    scale: 0.7;
+  }
+
+  .auth-mark-3 {
+    top: 14%;
+    left: 42%;
+    animation-delay: -6.5s;
+    scale: 0.85;
+    opacity: 0.4;
+  }
+
+  @media (max-width: 1023px) {
+    .auth-mark-3 {
+      top: auto;
+      bottom: 8%;
+      left: auto;
+      right: 6%;
+    }
+  }
+
+  @keyframes auth-drift-a {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(7%, 10%, 0) scale(1.12);
+    }
+  }
+
+  @keyframes auth-drift-b {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(-8%, -12%, 0) scale(1.08);
+    }
+  }
+
+  @keyframes auth-grid-shift {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 48px 48px;
+    }
+  }
+
+  @keyframes auth-float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-22px) rotate(10deg);
+    }
+  }
+
   .landing-depth-track {
     height: 3px;
     width: 56px;
