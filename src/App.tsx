@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AppShell from './components/AppShell';
 import { BrowseLayout } from './components/PublicLayout';
+import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { RequireAuth } from './auth';
 
 const Landing = lazy(() => import('./pages/Landing'));
@@ -71,6 +72,7 @@ function App() {
           <Route path="*" element={<Navigate to="/explore" replace />} />
         </Routes>
       </Suspense>
+      <CookieConsentBanner />
     </Router>
   );
 }

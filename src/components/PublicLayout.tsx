@@ -43,9 +43,7 @@ function NavIconLink({
 }) {
   return (
     <Link to={to} className={`${className} inline-flex items-center gap-2`} onClick={onClick}>
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-        <IconCmp size={15} weight="duotone" aria-hidden="true" />
-      </span>
+      <IconCmp size={16} weight="duotone" className="shrink-0 text-primary" aria-hidden="true" />
       {label}
     </Link>
   );

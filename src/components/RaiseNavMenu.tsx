@@ -61,9 +61,7 @@ export function RaiseNavMenu({
             active ? 'text-on-surface' : ''
           }`}
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <CurrencyInr size={15} weight="duotone" aria-hidden="true" />
-          </span>
+          <CurrencyInr size={16} weight="duotone" className="text-primary" aria-hidden="true" />
           Raise
         </p>
         <div className="ml-2 flex flex-col gap-1 border-l border-outline-variant/40 pl-3">
@@ -78,9 +76,7 @@ export function RaiseNavMenu({
                   location.pathname === link.to ? 'text-on-surface' : ''
                 }`}
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <ItemIcon size={15} weight="duotone" aria-hidden="true" />
-                </span>
+                <ItemIcon size={15} weight="duotone" className="shrink-0 text-primary" aria-hidden="true" />
                 {link.label}
               </Link>
             );
@@ -100,9 +96,7 @@ export function RaiseNavMenu({
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
-          <CurrencyInr size={15} weight="duotone" aria-hidden="true" />
-        </span>
+        <CurrencyInr size={16} weight="duotone" className="text-primary" aria-hidden="true" />
         Raise
         <CaretDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
@@ -129,9 +123,7 @@ export function RaiseNavMenu({
                     : 'text-on-surface-variant'
                 }`}
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <ItemIcon size={17} weight="duotone" aria-hidden="true" />
-                </span>
+                <ItemIcon size={17} weight="duotone" className="shrink-0 text-primary" aria-hidden="true" />
                 {link.label}
               </Link>
             );

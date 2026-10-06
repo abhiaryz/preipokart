@@ -97,9 +97,7 @@ function NavList({
             }`;
           }}
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Icon size={17} weight="duotone" aria-hidden="true" />
-          </span>
+          <Icon size={18} weight="duotone" className="shrink-0 text-primary" aria-hidden="true" />
           {label}
         </NavLink>
       ))}
