@@ -17,10 +17,10 @@ import {
   Vault,
 } from '@phosphor-icons/react';
 import { CompanyLogo } from '../components/ui';
-import HeroBackgroundAnimation from '../components/HeroBackgroundAnimation';
+import HeroChartBackground from '../components/HeroChartBackground';
 import { SiteFooter, SiteHeader } from '../components/PublicLayout';
 import { api } from '../api';
-import type { FaqItem, StockListItem } from '../api/types';
+import type { FaqItem } from '../api/types';
 import { useApi } from '../hooks/useApi';
 
 function PopIn({
@@ -121,174 +121,6 @@ const features = [
   },
 ];
 
-const sampleChartPrices = [412, 408, 415, 411, 418, 414, 421, 419, 424, 422, 426, 423, 428, 425, 429, 427, 431, 426, 424, 425.5];
-const sampleChartVolume = [42, 28, 55, 38, 62, 45, 71, 52, 48, 66, 58, 44, 73, 51, 39, 67, 54, 61, 47, 59];
-
-function SampleBookChart({ featured }: { featured: StockListItem }) {
-  const chartW = 320;
-  const chartH = 72;
-  const volH = 28;
-  const pad = 4;
-
-  const minP = Math.min(...sampleChartPrices) - 2;
-  const maxP = Math.max(...sampleChartPrices) + 2;
-  const maxVol = Math.max(...sampleChartVolume);
-
-  const toY = (price: number) => pad + ((maxP - price) / (maxP - minP)) * (chartH - pad * 2);
-  const linePath = sampleChartPrices
-    .map((p, i) => {
-      const x = pad + (i / (sampleChartPrices.length - 1)) * (chartW - pad * 2);
-      return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${toY(p).toFixed(1)}`;
-    })
-    .join(' ');
-  const areaPath = `${linePath} L ${chartW - pad} ${chartH} L ${pad} ${chartH} Z`;
-
-  const bidY = toY(featured.price * 0.998);
-  const askY = toY(featured.price * 1.004);
-
-  return (
-    <div className="border-b border-outline-variant/40 bg-surface-container-low/30 px-4 py-3 sm:px-5 sm:py-4">
-      <div className="mb-2.5 flex items-end justify-between gap-3 sm:mb-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <CompanyLogo name={featured.name} domain={featured.domain} size="sm" />
-          <div className="min-w-0">
-            <p className="truncate font-medium">{featured.name}</p>
-            <p className="font-data-md text-xs text-on-surface-variant">{featured.ticker} · 1D</p>
-          </div>
-        </div>
-        <div className="shrink-0 text-right">
-          <p className="font-data-lg text-data-lg">
-            ₹{featured.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-          </p>
-          <p className="text-xs text-bid">+{featured.change}% today</p>
-        </div>
-      </div>
-
-      <div className="relative overflow-hidden rounded-lg border border-outline-variant/35 bg-card/60">
-        <svg viewBox={`0 0 ${chartW} ${chartH + volH + 16}`} className="h-auto w-full" preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <linearGradient id="sample-book-area" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgb(var(--color-bid) / 0.22)" />
-              <stop offset="100%" stopColor="rgb(var(--color-bid) / 0)" />
-            </linearGradient>
-          </defs>
-
-          {/* Grid lines */}
-          {[0.25, 0.5, 0.75].map((pct) => (
-            <line
-              key={pct}
-              x1={pad}
-              y1={pad + pct * (chartH - pad * 2)}
-              x2={chartW - pad}
-              y2={pad + pct * (chartH - pad * 2)}
-              stroke="rgb(var(--color-outline-variant) / 0.25)"
-              strokeWidth="0.5"
-              strokeDasharray="3 4"
-            />
-          ))}
-
-          {/* Bid / ask reference lines */}
-          <line
-            x1={pad}
-            y1={bidY}
-            x2={chartW - pad}
-            y2={bidY}
-            stroke="rgb(var(--color-bid) / 0.35)"
-            strokeWidth="0.75"
-            strokeDasharray="4 3"
-          />
-          <line
-            x1={pad}
-            y1={askY}
-            x2={chartW - pad}
-            y2={askY}
-            stroke="rgb(var(--color-ask) / 0.35)"
-            strokeWidth="0.75"
-            strokeDasharray="4 3"
-          />
-
-          <path d={areaPath} fill="url(#sample-book-area)" />
-          <path
-            d={linePath}
-            fill="none"
-            stroke="rgb(var(--color-bid))"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-
-          {/* Last price dot */}
-          <circle
-            cx={chartW - pad}
-            cy={toY(sampleChartPrices[sampleChartPrices.length - 1])}
-            r="3"
-            fill="rgb(var(--color-bid))"
-          />
-          <circle
-            cx={chartW - pad}
-            cy={toY(sampleChartPrices[sampleChartPrices.length - 1])}
-            r="6"
-            fill="rgb(var(--color-bid) / 0.2)"
-          />
-
-          {/* Volume bars */}
-          {sampleChartVolume.map((vol, i) => {
-            const barW = (chartW - pad * 2) / sampleChartVolume.length - 2;
-            const x = pad + i * ((chartW - pad * 2) / sampleChartVolume.length) + 1;
-            const h = (vol / maxVol) * (volH - 4);
-            const y = chartH + 12 + (volH - h);
-            return (
-              <rect
-                key={i}
-                x={x}
-                y={y}
-                width={Math.max(barW, 2)}
-                height={h}
-                fill={sampleChartPrices[i] >= (sampleChartPrices[i - 1] ?? sampleChartPrices[i]) ? 'rgb(var(--color-bid) / 0.35)' : 'rgb(var(--color-ask) / 0.35)'}
-                rx="0.5"
-              />
-            );
-          })}
-
-          {/* Time labels */}
-          {['09:30', '11:00', '13:00', '15:00'].map((label, i) => (
-            <text
-              key={label}
-              x={pad + (i / 3) * (chartW - pad * 2)}
-              y={chartH + volH + 14}
-              fill="rgb(var(--color-on-surface-variant) / 0.55)"
-              fontSize="8"
-              fontFamily="JetBrains Mono, ui-monospace, monospace"
-            >
-              {label}
-            </text>
-          ))}
-        </svg>
-
-        <div className="absolute right-2 top-2 flex flex-col gap-1 text-right font-data-md text-[9px]">
-          <span className="text-bid/80">Bid ₹{(featured.price * 0.998).toFixed(2)}</span>
-          <span className="text-ask/80">Ask ₹{(featured.price * 1.004).toFixed(2)}</span>
-        </div>
-      </div>
-
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-data-md text-[10px] text-on-surface-variant">
-        <span>
-          Vol <span className="text-on-surface/70">1.24L</span>
-        </span>
-        <span>
-          High <span className="text-bid">₹431.00</span>
-        </span>
-        <span>
-          Low <span className="text-ask">₹408.00</span>
-        </span>
-        <span>
-          Spread <span className="text-on-surface/70">0.60%</span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <p className="font-label-caps text-label-caps uppercase tracking-widest text-primary">{children}</p>
@@ -322,16 +154,7 @@ export default function Landing() {
   const { data: publicStats } = useApi(() => api.getPublicStats(), []);
   const { data: faqList } = useApi(() => api.listFaqs(), []);
   const listedCompanies = stockList?.data ?? [];
-  const heroStocks = listedCompanies.slice(0, 4);
-  const featured = heroStocks[0];
   const landingFaqs: FaqItem[] = (faqList?.data ?? []).slice(0, 3);
-  const lastPrints = heroStocks.slice(0, 3).map((stock, index) => ({
-    time: ['14:52', '14:49', '14:41'][index] ?? '14:30',
-    ticker: stock.ticker,
-    price: `₹${stock.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-    qty: String([40, 12, 200][index] ?? 10),
-    up: stock.change >= 0,
-  }));
   const stats = [
     { value: `${publicStats?.companyCount ?? listedCompanies.length}+`, label: 'Private companies' },
     { value: publicStats?.escrowHeldLabel ?? '—', label: 'Held in escrow' },
@@ -353,153 +176,46 @@ export default function Landing() {
       <main id="main">
         {/* Hero */}
         <section className="landing-hero relative flex min-h-[calc(100dvh-var(--header-height))] flex-col justify-center overflow-hidden">
-          <HeroBackgroundAnimation />
-          <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden="true">
+          <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
             <div className="landing-grid absolute inset-0 opacity-[0.35]" />
-            <div className="landing-hero-glow absolute left-1/2 top-0 h-[min(520px,70vh)] w-[min(720px,100vw)] -translate-x-1/2" />
+            <HeroChartBackground />
+            <div className="landing-hero-text-glow absolute inset-0" />
             <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-canvas to-transparent sm:h-32" />
           </div>
 
-          <div className="relative z-[2] mx-auto w-full max-w-[1400px] px-4 pb-10 pt-4 sm:px-6 sm:pb-12 sm:pt-5 lg:px-8 lg:pb-14 lg:pt-6">
-            <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10 xl:gap-12">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
-                    Unlisted equity, India
-                  </p>
-                  <span className="inline-flex items-center gap-1.5 rounded-md border border-bid/25 bg-bid/10 px-2 py-0.5 font-label-caps text-[10px] uppercase tracking-wider text-bid">
-                    <span className="h-1.5 w-1.5 rounded-full bg-bid" />
-                    Live book
-                  </span>
-                </div>
+          <div className="relative z-[2] mx-auto flex w-full max-w-[1400px] flex-col items-center px-4 pb-16 pt-6 text-center sm:px-6 sm:pb-20 sm:pt-8 lg:px-8 lg:pb-24 lg:pt-10">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <p className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
+                Unlisted equity, India
+              </p>
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-bid/25 bg-bid/10 px-2 py-0.5 font-label-caps text-[10px] uppercase tracking-wider text-bid">
+                <span className="h-1.5 w-1.5 rounded-full bg-bid" />
+                Live book
+              </span>
+            </div>
 
-                <h1 className="mt-3 max-w-[15ch] text-[clamp(1.875rem,4vw+0.75rem,3rem)] font-semibold leading-[1.08] tracking-tight sm:mt-4 lg:max-w-[16ch] lg:text-display-lg">
-                  Buy shares in companies{' '}
-                  <span className="landing-gradient-text">before they list</span>
-                </h1>
+            <h1 className="mt-4 max-w-[22ch] text-[clamp(2rem,4.5vw+0.75rem,3.75rem)] font-semibold leading-[1.06] tracking-tight sm:mt-5">
+              Buy shares in companies <br className="hidden sm:block" />
+              <span className="landing-gradient-text">before they list</span>
+            </h1>
 
-                <p className="mt-4 max-w-[44ch] text-base leading-relaxed text-on-surface-variant sm:text-body-lg">
-                  Browse private companies, place a buy or sell request, and we hold funds in escrow until the deal
-                  settles.
-                </p>
+            <p className="mt-5 max-w-[46ch] text-base leading-relaxed text-on-surface-variant sm:text-body-lg">
+              Browse private companies, place a buy or sell request, and we hold funds in escrow until the deal
+              settles.
+            </p>
 
-                <div className="mt-6 flex flex-col gap-2.5 sm:mt-7 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-                  <Link to="/signup" className="btn-primary min-h-11 w-full min-w-0 px-6 sm:min-h-12 sm:w-auto sm:px-7">
-                    Get started
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </Link>
-                  <a
-                    href="#how-it-works"
-                    className="btn-secondary min-h-11 w-full min-w-0 px-6 sm:min-h-12 sm:w-auto sm:px-7"
-                  >
-                    How it works
-                    <CaretDown size={16} aria-hidden="true" />
-                  </a>
-                </div>
-              </div>
-
-              {/* Market preview card */}
-              <div className="min-w-0">
-                <PopIn delay={80} className="h-full">
-                <div className="landing-market-card elevation-active overflow-hidden rounded-xl sm:rounded-2xl">
-                  <div className="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-4 py-3 sm:items-center sm:px-5 sm:py-3.5">
-                    <div className="min-w-0">
-                      <p className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
-                        Sample request book
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-on-surface-variant/80 sm:text-xs">
-                        Illustrative, not live quotes
-                      </p>
-                    </div>
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-outline-variant/40 bg-surface-container-low px-2 py-1 font-data-md text-[10px] text-bid sm:text-[11px]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-bid" />
-                      Open
-                    </span>
-                  </div>
-
-                  {featured ? <SampleBookChart featured={featured} /> : <div className="h-40 bg-surface-container-low/30" />}
-
-                  <div className="hidden border-b border-outline-variant/30 bg-canvas/40 px-5 py-2 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-1">
-                    <span className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
-                      Last prints
-                    </span>
-                    {lastPrints.map((print) => (
-                      <span key={`${print.ticker}-${print.time}`} className="font-data-md text-[10px] text-on-surface-variant">
-                        {print.time}{' '}
-                        <span className={print.up ? 'text-bid' : 'text-ask'}>
-                          {print.ticker} {print.price} × {print.qty}
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="hidden px-5 py-2 sm:grid sm:grid-cols-[1fr_auto_auto_auto_auto] sm:gap-4 sm:text-[11px] sm:uppercase sm:tracking-wider sm:text-on-surface-variant">
-                    <span>Company</span>
-                    <span className="text-right">Bid</span>
-                    <span className="text-right">Ask</span>
-                    <span className="text-right">LTP</span>
-                    <span className="text-right">Change</span>
-                  </div>
-
-                  <ul className="divide-y divide-outline-variant/30">
-                    {heroStocks.map((company, index) => {
-                      const bid = company.price * 0.998;
-                      const ask = company.price * 1.004;
-                      const bidDepth = [78, 62, 40, 33][index] ?? 50;
-                      const askDepth = [46, 54, 68, 71][index] ?? 50;
-                      return (
-                        <li key={company.id}>
-                          <Link
-                            to={`/stocks/${company.id}`}
-                            className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-4 py-3 transition duration-200 hover:bg-on-surface/[0.03] sm:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto] sm:gap-3 sm:px-5 sm:py-3.5"
-                          >
-                            <CompanyLogo name={company.name} domain={company.domain} size="sm" />
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-medium sm:text-base">{company.name}</p>
-                              <p className="truncate text-xs text-on-surface-variant">{company.sector}</p>
-                            </div>
-                            <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
-                              <span className="font-data-md text-sm text-bid">₹{bid.toFixed(2)}</span>
-                              <span className="landing-depth-track bg-bid/15" aria-hidden="true">
-                                <span className="block h-full bg-bid/55" style={{ width: `${bidDepth}%` }} />
-                              </span>
-                            </div>
-                            <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
-                              <span className="font-data-md text-sm text-ask">₹{ask.toFixed(2)}</span>
-                              <span className="landing-depth-track bg-ask/15" aria-hidden="true">
-                                <span className="block h-full bg-ask/55" style={{ width: `${askDepth}%` }} />
-                              </span>
-                            </div>
-                            <div className="hidden shrink-0 text-right font-data-md text-sm sm:block">
-                              ₹{company.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                            </div>
-                            <div className="shrink-0 text-right">
-                              <p className="font-data-md text-sm sm:hidden">
-                                ₹{company.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                              </p>
-                              <p className={`text-xs sm:text-sm ${company.change >= 0 ? 'text-bid' : 'text-ask'}`}>
-                                {company.change >= 0 ? '+' : ''}
-                                {company.change}%
-                              </p>
-                            </div>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-
-                  <div className="flex flex-col gap-2 border-t border-outline-variant/40 bg-surface-container-low/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                    <p className="text-xs text-on-surface-variant">
-                      {heroStocks.length} of {listedCompanies.length} companies shown
-                    </p>
-                    <Link to="/explore" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-                      View all
-                      <ArrowRight size={12} aria-hidden="true" />
-                    </Link>
-                  </div>
-                </div>
-                </PopIn>
-              </div>
+            <div className="mt-7 flex w-full flex-col gap-2.5 sm:mt-8 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
+              <Link to="/signup" className="btn-primary min-h-11 w-full min-w-0 px-6 sm:min-h-12 sm:w-auto sm:px-7">
+                Get started
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+              <a
+                href="#how-it-works"
+                className="btn-secondary min-h-11 w-full min-w-0 px-6 sm:min-h-12 sm:w-auto sm:px-7"
+              >
+                How it works
+                <CaretDown size={16} aria-hidden="true" />
+              </a>
             </div>
           </div>
         </section>

@@ -240,16 +240,6 @@
     mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 20%, transparent 75%);
   }
 
-  .landing-hero-glow {
-    background: radial-gradient(
-      ellipse at center,
-      rgb(var(--color-primary-container) / 0.18) 0%,
-      rgb(var(--color-secondary-container) / 0.06) 45%,
-      transparent 70%
-    );
-    filter: blur(60px);
-  }
-
   .landing-gradient-text {
     background-image: linear-gradient(
       135deg,
@@ -261,11 +251,13 @@
     color: transparent;
   }
 
-  .landing-market-card {
-    box-shadow:
-      var(--shadow-widget),
-      0 0 0 1px rgb(var(--color-primary-container) / 0.08),
-      0 24px 48px -24px rgb(var(--color-primary-container) / 0.25);
+  .landing-hero-text-glow {
+    background: radial-gradient(
+      ellipse 46% 52% at 50% 46%,
+      rgb(var(--color-canvas) / 0.92) 0%,
+      rgb(var(--color-canvas) / 0.6) 45%,
+      transparent 100%
+    );
   }
 
   .landing-cta-card {
@@ -276,23 +268,6 @@
     background:
       radial-gradient(ellipse 60% 80% at 0% 100%, rgb(var(--color-primary-container) / 0.12), transparent 55%),
       radial-gradient(ellipse 50% 60% at 100% 0%, rgb(var(--color-secondary-container) / 0.08), transparent 50%);
-  }
-
-  .landing-hero-animation {
-    z-index: 0;
-  }
-
-  .landing-hero-animation-mask {
-    background:
-      radial-gradient(ellipse 90% 75% at 50% 40%, transparent 15%, rgb(var(--color-canvas) / 0.6) 65%, rgb(var(--color-canvas) / 0.94) 100%),
-      linear-gradient(to bottom, rgb(var(--color-canvas) / 0.55) 0%, transparent 28%, transparent 58%, rgb(var(--color-canvas) / 0.8) 100%);
-  }
-
-  .landing-quant-label {
-    padding: 0.35rem 0.6rem;
-    border-radius: 0.375rem;
-    border: 1px solid rgb(var(--color-outline-variant) / 0.15);
-    background: rgb(var(--color-card) / 0.2);
   }
 
   @keyframes card-pop {
@@ -461,12 +436,6 @@
     }
   }
 
-  .landing-depth-track {
-    height: 3px;
-    width: 56px;
-    overflow: hidden;
-    border-radius: 1px;
-  }
 }
 
 @layer utilities {
