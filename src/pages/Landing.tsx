@@ -3,11 +3,9 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   Bank,
-  Buildings,
   CaretDown,
   ChartLineUp,
   CheckCircle,
-  Handshake,
   LockKey,
   Minus,
   Plus,
@@ -78,17 +76,18 @@ const trustSignals = [
 
 const steps = [
   {
-    icon: Buildings,
     title: 'Browse companies',
     body: 'Explore private companies not yet listed on NSE or BSE, with sector, price, and implied valuation.',
   },
   {
-    icon: Handshake,
+    title: 'Complete KYC',
+    body: 'Verify your identity from your profile. Both sides of every deal must be KYC-checked before a match.',
+  },
+  {
     title: 'Place a buy or sell request',
     body: 'Set your price and quantity. We match your request with someone on the other side of the book.',
   },
   {
-    icon: Vault,
     title: 'Settle with escrow',
     body: 'Money is held safely until the deal completes. Track every step from your dashboard.',
   },
@@ -99,25 +98,48 @@ const features = [
     icon: TrendUp,
     title: 'Live market view',
     body: 'Home shows bids, asks, and recent trades so you can gauge how a name is moving today.',
-    span: 'lg:col-span-2',
   },
   {
     icon: ShieldCheck,
     title: 'Identity check before you trade',
     body: 'Complete KYC from your profile. Both sides of every deal are verified.',
-    span: '',
   },
   {
     icon: LockKey,
     title: 'Request book, not an exchange',
     body: 'A curated book for unlisted shares. Illiquid names can take longer to match.',
-    span: '',
   },
   {
     icon: Bank,
     title: 'Help when you are stuck',
     body: 'In-app Help explains settlement, cancellations, and what happens if a request does not fill.',
-    span: 'lg:col-span-2',
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      'I could see the book, complete KYC, and place a request without guessing how settlement works. Escrow made the first trade feel safer.',
+    name: 'Ananya Mehta',
+    role: 'First-time pre-IPO buyer, Bengaluru',
+    image:
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=160&h=160&q=80',
+  },
+  {
+    quote:
+      'Listing a sell request was straightforward. Matching took time on a quieter name, but every status update was clear in the dashboard.',
+    name: 'Rohit Kapoor',
+    role: 'Early employee, Mumbai',
+    image:
+      'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=160&h=160&q=80',
+  },
+  {
+    quote:
+      'Finally a place that treats unlisted shares like a careful process — not a noisy exchange. The living book helped me decide when to act.',
+    name: 'Priya Nair',
+    role: 'Angel investor, Hyderabad',
+    image:
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=160&h=160&q=80',
   },
 ];
 
@@ -248,74 +270,89 @@ export default function Landing() {
         </section>
 
         {/* How it works */}
-        <section id="how-it-works" className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8">
-          <SectionHeading
-            label="Process"
-            title="How it works"
-            description="Three steps from browse to settlement. No autoplay and no rotating banners."
-          />
+        <section id="how-it-works" className="relative overflow-hidden py-20 sm:py-24">
+          <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+            <div className="landing-how-grid absolute inset-0" />
+            <div className="landing-how-glow absolute inset-0" />
+          </div>
 
-          <ol className="relative mt-14 grid gap-6 md:grid-cols-3">
-            <div
-              className="pointer-events-none absolute left-[16.67%] right-[16.67%] top-10 hidden h-px bg-gradient-to-r from-transparent via-outline-variant/60 to-transparent md:block"
-              aria-hidden="true"
-            />
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <li key={step.title} className="relative h-full">
-                  <PopIn delay={index * 100} className="h-full">
-                  <article className="card group h-full p-6 transition duration-200 hover:border-primary-container/30">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full border border-primary-container/30 bg-primary-container/10 font-data-md text-sm text-primary">
+          <div className="relative z-[1] mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+            <header className="mx-auto max-w-[40rem] text-center">
+              <p className="font-label-caps text-[11px] uppercase tracking-widest text-primary">Process</p>
+              <h2 className="mt-4 text-[clamp(1.75rem,2.5vw+0.75rem,2.75rem)] font-semibold leading-[1.1] tracking-tight">
+                How it works
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-on-surface-variant sm:text-body-lg">
+                Four steps from browse to settlement — including KYC before you trade.
+              </p>
+            </header>
+
+            <ol className="relative mt-14 grid gap-12 sm:grid-cols-2 md:mt-16 lg:grid-cols-4 lg:gap-8">
+              <div
+                className="pointer-events-none absolute left-[12.5%] right-[12.5%] top-5 hidden h-px bg-gradient-to-r from-transparent via-outline-variant/50 to-transparent lg:block"
+                aria-hidden="true"
+              />
+              {steps.map((step, index) => (
+                <li key={step.title} className="relative text-center lg:text-left">
+                  <PopIn delay={index * 90} lift={false}>
+                    <article>
+                      <span className="relative z-[1] mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-primary-container/25 bg-canvas font-data-md text-sm text-primary lg:mx-0">
                         {index + 1}
                       </span>
-                      <span className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
-                        Step {index + 1}
-                      </span>
-                    </div>
-                    <Icon
-                      className="mt-5 text-primary transition duration-200 group-hover:scale-105 motion-reduce:transform-none"
-                      size={28}
-                      aria-hidden="true"
-                    />
-                    <h3 className="mt-4 font-headline-sm text-xl">{step.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{step.body}</p>
-                  </article>
+                      <h3 className="mt-5 font-headline-sm text-xl tracking-tight md:text-[1.35rem]">
+                        {step.title}
+                      </h3>
+                      <p className="mt-2.5 text-sm leading-relaxed text-on-surface-variant lg:max-w-[28ch]">
+                        {step.body}
+                      </p>
+                    </article>
                   </PopIn>
                 </li>
-              );
-            })}
-          </ol>
+              ))}
+            </ol>
+          </div>
         </section>
 
-        {/* Features bento */}
-        <section className="border-y border-outline-variant/40 bg-surface-container-low/30">
-          <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8">
-            <SectionHeading
-              label="Platform"
-              title="Built for careful first-time buyers"
-              description="Everything you need to research, request, and track unlisted trades — without the noise of a public exchange."
-            />
+        {/* Platform */}
+        <section className="relative overflow-hidden border-y border-outline-variant/40 py-20 sm:py-24">
+          <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+            <div className="landing-how-grid absolute inset-0" />
+            <div className="landing-how-glow absolute inset-0" />
+          </div>
 
-            <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="relative z-[1] mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+            <header className="mx-auto max-w-[42rem] text-center">
+              <p className="font-label-caps text-[11px] uppercase tracking-widest text-primary">Platform</p>
+              <h2 className="mt-4 text-[clamp(1.75rem,2.5vw+0.75rem,2.75rem)] font-semibold leading-[1.1] tracking-tight">
+                Built for careful first-time buyers
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-on-surface-variant sm:text-body-lg">
+                Research, request, and track unlisted trades — without exchange noise.
+              </p>
+            </header>
+
+            <ul className="mt-14 grid gap-12 sm:grid-cols-2 md:mt-16 lg:grid-cols-4 lg:gap-8">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
-                  <PopIn key={feature.title} delay={(index % 3) * 80} className={`h-full ${feature.span}`}>
-                  <article
-                    className="card group h-full p-6 transition duration-200 hover:border-primary-container/25"
-                  >
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant/40 bg-surface-container-low">
-                      <Icon className="text-primary" size={22} aria-hidden="true" />
-                    </span>
-                    <h3 className="mt-5 font-headline-sm text-xl">{feature.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{feature.body}</p>
-                  </article>
-                  </PopIn>
+                  <li key={feature.title} className="text-center lg:text-left">
+                    <PopIn delay={(index % 4) * 80} lift={false}>
+                      <article>
+                        <span className="mx-auto inline-flex h-10 w-10 items-center justify-center text-primary lg:mx-0">
+                          <Icon size={28} aria-hidden="true" />
+                        </span>
+                        <h3 className="mt-5 font-headline-sm text-xl tracking-tight md:text-[1.35rem]">
+                          {feature.title}
+                        </h3>
+                        <p className="mt-2.5 text-sm leading-relaxed text-on-surface-variant lg:max-w-[28ch]">
+                          {feature.body}
+                        </p>
+                      </article>
+                    </PopIn>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           </div>
         </section>
 
@@ -424,6 +461,55 @@ export default function Landing() {
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="relative overflow-hidden py-20 sm:py-24">
+          <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+            <div className="landing-how-grid absolute inset-0" />
+            <div className="landing-how-glow absolute inset-0" />
+          </div>
+
+          <div className="relative z-[1] mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+            <header className="mx-auto max-w-[40rem] text-center">
+              <p className="font-label-caps text-[11px] uppercase tracking-widest text-primary">Testimonials</p>
+              <h2 className="mt-4 text-[clamp(1.75rem,2.5vw+0.75rem,2.75rem)] font-semibold leading-[1.1] tracking-tight">
+                What buyers and sellers say
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-on-surface-variant sm:text-body-lg">
+                Real voices from people researching and trading unlisted names.
+              </p>
+            </header>
+
+            <ul className="mt-14 grid gap-12 md:mt-16 md:grid-cols-3 md:gap-10 lg:gap-14">
+              {testimonials.map((item, index) => (
+                <li key={item.name} className="text-center md:text-left">
+                  <PopIn delay={index * 90} lift={false}>
+                    <blockquote>
+                      <p className="text-base leading-relaxed text-on-surface md:text-[1.05rem]">
+                        “{item.quote}”
+                      </p>
+                      <footer className="mt-6 flex flex-col items-center gap-3 md:flex-row md:items-center">
+                        <img
+                          src={item.image}
+                          alt=""
+                          width={48}
+                          height={48}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-outline-variant/50"
+                        />
+                        <div className="min-w-0">
+                          <p className="font-headline-sm text-base tracking-tight">{item.name}</p>
+                          <p className="mt-0.5 text-sm text-on-surface-variant">{item.role}</p>
+                        </div>
+                      </footer>
+                    </blockquote>
+                  </PopIn>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 

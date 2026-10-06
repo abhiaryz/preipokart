@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, TrendDown, TrendUp } from '@phosphor-icons/react';
 import { CompanyLogo, PageHeader, QueryStatus } from '../components/ui';
+import { ExploreViewSwitch } from '../components/ExploreViewSwitch';
 import { api } from '../api';
 import { useApi } from '../hooks/useApi';
 
@@ -24,6 +25,7 @@ export default function Explore() {
       <PageHeader
         title="Companies"
         description="These companies are not yet listed on the stock exchange. Tap a card to see the company page."
+        actions={<ExploreViewSwitch active="cards" />}
       />
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">

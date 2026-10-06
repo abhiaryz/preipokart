@@ -1,25 +1,60 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ArrowRight, List, X } from '@phosphor-icons/react';
+import {
+  ArrowRight,
+  BookOpenText,
+  ChartScatter,
+  ChatCircleDots,
+  List,
+  PaperPlaneTilt,
+  RocketLaunch,
+  X,
+  type Icon,
+} from '@phosphor-icons/react';
 import { BrandLogo } from './ui';
+import { GlobalNavSearch } from './GlobalNavSearch';
+import { RaiseNavMenu } from './RaiseNavMenu';
 import { api } from '../api';
 import { useAuth } from '../auth';
 import { useApi } from '../hooks/useApi';
 import AppShell from './AppShell';
+import { raiseNavLinks } from '../pages/raise/raiseContent';
 
-const links = [
-  { label: 'How it works', to: '/#how-it-works' },
-  { label: 'Companies', to: '/explore' },
-  { label: 'IPOs', to: '/ipos' },
-  { label: 'Blog / News', to: '/blog' },
-  { label: 'FAQ', to: '/faq' },
-  { label: 'Contact us', to: '/contact' },
+const links: Array<{ label: string; to: string; icon: Icon }> = [
+  { label: 'Screener', to: '/explore/screener', icon: ChartScatter },
+  { label: 'IPOs', to: '/ipos', icon: RocketLaunch },
+  { label: 'Blog / News', to: '/blog', icon: BookOpenText },
+  { label: 'FAQ', to: '/faq', icon: ChatCircleDots },
+  { label: 'Contact us', to: '/contact', icon: PaperPlaneTilt },
 ];
+
+function NavIconLink({
+  to,
+  label,
+  icon: IconCmp,
+  className,
+  onClick,
+}: {
+  to: string;
+  label: string;
+  icon: Icon;
+  className: string;
+  onClick?: () => void;
+}) {
+  return (
+    <Link to={to} className={`${className} inline-flex items-center gap-2`} onClick={onClick}>
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+        <IconCmp size={15} weight="duotone" aria-hidden="true" />
+      </span>
+      {label}
+    </Link>
+  );
+}
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-  const companiesActive = location.pathname.startsWith('/explore') || location.pathname.startsWith('/stocks');
+  const screenerActive = location.pathname.startsWith('/explore') || location.pathname.startsWith('/stocks');
   const blogActive = location.pathname.startsWith('/blog');
   const iposActive = location.pathname.startsWith('/ipos');
   const faqActive = location.pathname.startsWith('/faq');
@@ -27,7 +62,7 @@ export function SiteHeader() {
 
   const navClass = (to: string) => {
     const active =
-      (to === '/explore' && companiesActive) ||
+      (to === '/explore/screener' && screenerActive) ||
       (to === '/blog' && blogActive) ||
       (to === '/ipos' && iposActive) ||
       (to === '/faq' && faqActive) ||
@@ -38,19 +73,23 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-nav border-b border-outline-variant/40 bg-canvas/90 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex min-h-11 items-center rounded-lg" aria-label="Preipokart home">
+        <Link to="/" className="flex min-h-11 shrink-0 items-center rounded-lg" aria-label="Preipokart home">
           <BrandLogo />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Page">
-          {links.map(({ label, to }) => (
-            <Link key={to} to={to} className={navClass(to)}>
-              {label}
-            </Link>
+        <GlobalNavSearch className="mx-1 w-full max-w-md flex-1" compact />
+
+        <nav className="hidden items-center gap-0.5 xl:flex" aria-label="Page">
+          {links.slice(0, 2).map(({ label, to, icon }) => (
+            <NavIconLink key={to} to={to} label={label} icon={icon} className={navClass(to)} />
+          ))}
+          <RaiseNavMenu />
+          {links.slice(2).map(({ label, to, icon }) => (
+            <NavIconLink key={to} to={to} label={label} icon={icon} className={navClass(to)} />
           ))}
         </nav>
 
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <Link to="/login" className="btn-ghost hidden min-h-11 sm:inline-flex">
             Log in
           </Link>
@@ -60,7 +99,7 @@ export function SiteHeader() {
           </Link>
           <button
             type="button"
-            className="btn-ghost min-h-11 min-w-11 md:hidden"
+            className="btn-ghost min-h-11 min-w-11 xl:hidden"
             aria-expanded={menuOpen}
             aria-controls="site-mobile-nav"
             onClick={() => setMenuOpen((open) => !open)}
@@ -72,17 +111,28 @@ export function SiteHeader() {
       </div>
 
       {menuOpen ? (
-        <nav id="site-mobile-nav" className="border-t border-outline-variant/40 px-4 py-3 md:hidden" aria-label="Mobile">
+        <nav id="site-mobile-nav" className="border-t border-outline-variant/40 px-4 py-3 xl:hidden" aria-label="Mobile">
           <div className="flex flex-col gap-1">
-            {links.map(({ label, to }) => (
-              <Link
+            {links.slice(0, 2).map(({ label, to, icon }) => (
+              <NavIconLink
                 key={to}
                 to={to}
+                label={label}
+                icon={icon}
                 className={`${navClass(to)} justify-start`}
                 onClick={() => setMenuOpen(false)}
-              >
-                {label}
-              </Link>
+              />
+            ))}
+            <RaiseNavMenu variant="mobile" onNavigate={() => setMenuOpen(false)} />
+            {links.slice(2).map(({ label, to, icon }) => (
+              <NavIconLink
+                key={to}
+                to={to}
+                label={label}
+                icon={icon}
+                className={`${navClass(to)} justify-start`}
+                onClick={() => setMenuOpen(false)}
+              />
             ))}
             <Link to="/login" className="btn-secondary min-h-11" onClick={() => setMenuOpen(false)}>
               Log in
@@ -118,8 +168,8 @@ export function SiteFooter() {
             <p className="font-label-caps text-label-caps uppercase text-on-surface">Explore</p>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
-                <Link to="/explore" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
-                  Companies
+                <Link to="/explore/screener" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
+                  Screener
                 </Link>
               </li>
               <li>
@@ -127,6 +177,13 @@ export function SiteFooter() {
                   IPOs
                 </Link>
               </li>
+              {raiseNavLinks.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <Link to="/blog" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
                   Blog / News

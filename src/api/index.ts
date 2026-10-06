@@ -136,13 +136,13 @@ export const api = {
 
   disconnectNsdl: () => request<null>('/v1/users/me/demat/nsdl', { method: 'DELETE' }),
 
-  listStocks: (params: { q?: string; sector?: string; sort?: string; order?: string } = {}) => {
+  listStocks: (params: { q?: string; sector?: string; sort?: string; order?: string; pageSize?: number } = {}) => {
     const query = new URLSearchParams();
     if (params.q) query.set('q', params.q);
     if (params.sector && params.sector !== 'All') query.set('sector', params.sector);
     if (params.sort) query.set('sort', params.sort);
     if (params.order) query.set('order', params.order);
-    query.set('pageSize', '50');
+    query.set('pageSize', String(params.pageSize ?? 50));
     const suffix = query.toString() ? `?${query}` : '';
     return request<{ data: StockListItem[]; meta?: ListResult<StockListItem>['meta'] }>(
       `/v1/markets/stocks${suffix}`,

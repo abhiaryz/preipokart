@@ -2,38 +2,58 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useState } from 'react';
 import {
   Bell,
-  Briefcase,
+  BookOpenText,
+  Certificate,
+  ChartPieSlice,
+  ChartScatter,
+  ChatCircleDots,
   ClipboardText,
-  Compass,
+  Handshake,
+  House,
+  IdentificationCard,
+  Lifebuoy,
   List,
-  ChartLineUp,
-  EnvelopeSimple,
-  Newspaper,
-  Question,
-  SealQuestion,
+  PaperPlaneTilt,
+  RocketLaunch,
   SignOut,
-  SquaresFour,
-  UserCircle,
+  Storefront,
+  Vault,
   X,
+  type Icon,
 } from '@phosphor-icons/react';
 import { BrandLogo } from './ui';
+import { GlobalNavSearch } from './GlobalNavSearch';
 import { useAuth } from '../auth';
+import { raiseNavLinks } from '../pages/raise/raiseContent';
+
+const raiseIconByPath: Record<string, Icon> = {
+  '/raise/pre-ipo-fundraising': Handshake,
+  '/raise/valuations': ChartPieSlice,
+  '/raise/sme-ipos': Certificate,
+  '/raise/sell-business': Storefront,
+};
 
 const primaryNav = [
-  { to: '/dashboard', label: 'Home', icon: SquaresFour },
-  { to: '/explore', label: 'Companies', icon: Compass },
-  { to: '/portfolio', label: 'Portfolio', icon: Briefcase },
+  { to: '/dashboard', label: 'Home', icon: House },
+  { to: '/explore/screener', label: 'Screener', icon: ChartScatter },
+  { to: '/portfolio', label: 'Portfolio', icon: Vault },
   { to: '/orders', label: 'Orders', icon: ClipboardText },
 ];
 
+const raiseNav = raiseNavLinks.map((link) => ({
+  to: link.to,
+  label: link.label,
+  icon: raiseIconByPath[link.to] ?? Handshake,
+}));
+
 const accountNav = [
-  { to: '/profile', label: 'Profile', icon: UserCircle },
+  { to: '/profile', label: 'Profile', icon: IdentificationCard },
   { to: '/notifications', label: 'Alerts', icon: Bell },
-  { to: '/ipos', label: 'IPOs', icon: ChartLineUp },
-  { to: '/blog', label: 'Blog / News', icon: Newspaper },
-  { to: '/faq', label: 'FAQ', icon: SealQuestion },
-  { to: '/contact', label: 'Contact us', icon: EnvelopeSimple },
-  { to: '/help', label: 'Help', icon: Question },
+  { to: '/ipos', label: 'IPOs', icon: RocketLaunch },
+  { to: '/blog', label: 'Blog / News', icon: BookOpenText },
+  { to: '/faq', label: 'FAQ', icon: ChatCircleDots },
+  { to: '/contact', label: 'Contact us', icon: PaperPlaneTilt },
+  { to: '/help', label: 'Help', icon: Lifebuoy },
 ];
 
 function Logo() {
@@ -66,7 +86,8 @@ function NavList({
             const active =
               isActive ||
               (to === '/orders' && location.pathname.startsWith('/place-order')) ||
-              (to === '/explore' && location.pathname.startsWith('/stocks')) ||
+              (to === '/explore/screener' &&
+                (location.pathname.startsWith('/explore') || location.pathname.startsWith('/stocks'))) ||
               (to === '/blog' && location.pathname.startsWith('/blog')) ||
               (to === '/faq' && location.pathname.startsWith('/faq'));
             return `flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition duration-200 ${
@@ -76,7 +97,9 @@ function NavList({
             }`;
           }}
         >
-          <Icon size={18} weight="regular" aria-hidden="true" />
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Icon size={17} weight="duotone" aria-hidden="true" />
+          </span>
           {label}
         </NavLink>
       ))}
@@ -94,6 +117,8 @@ export default function AppShell() {
     <>
       <p className="mb-2 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">Browse</p>
       <NavList items={primaryNav} onNavigate={close} />
+      <p className="mb-2 mt-5 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">Raise</p>
+      <NavList items={raiseNav} onNavigate={close} />
       <p className="mb-2 mt-5 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">Account</p>
       <NavList items={accountNav} onNavigate={close} />
     </>
@@ -101,11 +126,12 @@ export default function AppShell() {
 
   return (
     <div className="min-h-[100dvh] bg-canvas text-on-surface">
-      <header className="fixed top-0 z-nav flex h-14 w-full items-center justify-between border-b border-on-surface/10 bg-surface/90 px-4 backdrop-blur-xl md:hidden">
+      <header className="fixed top-0 z-nav flex h-14 w-full items-center gap-3 border-b border-on-surface/10 bg-surface/90 px-4 backdrop-blur-xl md:hidden">
         <Logo />
+        <GlobalNavSearch className="min-w-0 flex-1" compact />
         <button
           type="button"
-          className="btn-ghost min-h-11 min-w-11"
+          className="btn-ghost min-h-11 min-w-11 shrink-0"
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? 'Close menu' : 'Open menu'}
@@ -135,7 +161,8 @@ export default function AppShell() {
 
       <aside className="fixed left-0 top-0 z-nav hidden h-full w-64 flex-col border-r border-outline-variant/40 bg-surface-container-lowest px-4 py-5 md:flex">
         <Logo />
-        <div className="mt-8 flex-1 overflow-y-auto">{menu}</div>
+        <GlobalNavSearch className="mt-5" />
+        <div className="mt-6 flex-1 overflow-y-auto">{menu}</div>
         <div className="border-t border-on-surface/10 pt-4">
           <p className="px-3 text-sm font-medium text-on-surface">{user?.name ?? 'Account'}</p>
           <p className="px-3 text-xs text-on-surface-variant">{user?.email}</p>

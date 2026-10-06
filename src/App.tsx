@@ -9,6 +9,7 @@ import { RequireAuth } from './auth';
 const Landing = lazy(() => import('./pages/Landing'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Explore = lazy(() => import('./pages/Explore'));
+const ExploreScreener = lazy(() => import('./pages/ExploreScreener'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
 const Orders = lazy(() => import('./pages/Orders'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
@@ -23,6 +24,7 @@ const IPOs = lazy(() => import('./pages/IPOs'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Careers = lazy(() => import('./pages/Careers'));
 const Legal = lazy(() => import('./pages/Legal'));
+const RaisePage = lazy(() => import('./pages/raise/RaisePage'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 
 function PageFallback() {
@@ -43,12 +45,14 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route element={<BrowseLayout />}>
             <Route path="explore" element={<Explore />} />
+            <Route path="explore/screener" element={<ExploreScreener />} />
             <Route path="stocks/:id" element={<StockDetail />} />
             <Route path="help" element={<Help />} />
             <Route path="blog" element={<Blog />} />
             <Route path="blog/:slug" element={<BlogPost />} />
             <Route path="faq" element={<Faq />} />
             <Route path="ipos" element={<IPOs />} />
+            <Route path="raise/:slug" element={<RaisePage />} />
             <Route path="contact" element={<Contact />} />
             <Route path="careers" element={<Careers />} />
             <Route path="legal/:slug" element={<Legal />} />
