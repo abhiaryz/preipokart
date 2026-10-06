@@ -64,7 +64,7 @@ function App() {
             <Route path="kyc" element={<RequireAuth><Navigate to="/profile?tab=kyc" replace /></RequireAuth>} />
             <Route path="biometric" element={<RequireAuth><Navigate to="/profile" replace /></RequireAuth>} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/explore" replace />} />
         </Routes>
       </Suspense>
     </Router>

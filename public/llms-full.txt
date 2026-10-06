@@ -1,0 +1,71 @@
+# PreIPOKart
+
+> PreIPOKart is an Indian marketplace where people buy and sell shares in private companies before those companies list on a stock exchange.
+
+## What the product is
+
+Investors browse well-known private companies, place a buy or sell request at a price and quantity they choose, and wait for a match. Money is held until the deal is done. The product is aimed at everyday investors in India.
+
+PreIPOKart is not:
+
+- a recognised stock exchange
+- an NSE or BSE broker
+- a source of live listed-market quotes
+- a guaranteed counterparty
+
+Prices shown on the home page and on a company page are last-traded or indicative.
+
+## How a visit works
+
+1. Home (https://preipokart.in/) explains the product and shows a sample of companies.
+2. Companies (https://preipokart.in/explore) is the full book. Visitors can search, filter by sector, and sort by percent change, price, or name.
+3. A company page is /stocks/{id}. It shows the company, price, and financials. If that id is missing, the visitor is sent to /explore.
+4. Placing an order requires an account. Sign up is https://preipokart.in/signup (name, email, password). Log in is https://preipokart.in/login.
+5. After sign-in, the investor can use the dashboard, portfolio, orders, and profile (KYC, demat, nominee). Those screens are private.
+
+## Missing pages
+
+Any address that is not a real page redirects to https://preipokart.in/explore.
+
+The same redirect is used when:
+
+- a company id does not exist
+- a blog slug does not exist
+- a legal policy slug does not exist
+
+## Public pages
+
+- [Home](https://preipokart.in/): Product introduction and sample companies.
+- [Companies](https://preipokart.in/explore): The unlisted book, and the fallback for missing pages.
+- [IPOs](https://preipokart.in/ipos): Public issues, including upcoming and open offers. These are separate from unlisted shares.
+- [Blog](https://preipokart.in/blog): Market notes. Individual posts are /blog/{slug}.
+- [FAQ](https://preipokart.in/faq): Questions about buying, selling, KYC, and fees.
+- [Help](https://preipokart.in/help): Short product help.
+- [Contact](https://preipokart.in/contact): Office in Bengaluru and a contact form. Email hello@preipokart.in.
+- [Careers](https://preipokart.in/careers): Open jobs. Email careers@preipokart.in.
+- [Terms of use](https://preipokart.in/legal/terms): Platform rules.
+- [Privacy policy](https://preipokart.in/legal/privacy): Personal data used for KYC and settlement.
+- [Sign up](https://preipokart.in/signup): Create an account.
+- [Log in](https://preipokart.in/login): Open an existing account.
+- [Sitemap](https://preipokart.in/sitemap.xml): Machine-readable list of public URLs.
+- [Short LLM guide](https://preipokart.in/llms.txt): The concise version of this file.
+
+## Private screens
+
+Do not treat these as public documents. They require a signed-in investor:
+
+- /dashboard
+- /portfolio
+- /orders and /orders/{id}
+- /place-order
+- /profile
+- /notifications
+- /kyc (opens profile KYC)
+- /biometric (opens profile)
+
+## Contact
+
+- Site: https://preipokart.in
+- Support: hello@preipokart.in
+- Careers: careers@preipokart.in
+- API: https://api.preipokart.in/v1

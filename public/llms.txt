@@ -1,0 +1,35 @@
+# PreIPOKart
+
+> PreIPOKart is an Indian marketplace where people buy and sell shares in private companies before those companies list on a stock exchange.
+
+PreIPOKart is not a recognised stock exchange, listed-market broker, or guaranteed counterparty. Prices on the home page and company pages are last-traded or indicative, not NSE or BSE quotes. An investor browses companies, places a buy or sell request at a stated price and quantity, and funds are held until the deal settles.
+
+If a page does not exist, or a company, blog post, or policy cannot be found, the site sends the visitor to the companies list at https://preipokart.in/explore.
+
+A longer guide for language models is at https://preipokart.in/llms-full.txt.
+
+## Public pages
+
+- [Home](https://preipokart.in/): What PreIPOKart is, how a request is placed, and a sample of companies.
+- [Companies](https://preipokart.in/explore): Searchable list of private companies on the book. This is also the fallback for missing pages.
+- [Company page](https://preipokart.in/explore): Open a company from the list. Each company lives at /stocks/{id}. A missing company returns to /explore.
+- [IPOs](https://preipokart.in/ipos): Upcoming, open, and recent public issues, separate from the unlisted book.
+- [Blog](https://preipokart.in/blog): Market notes. Each post lives at /blog/{slug}. A missing post returns to /explore.
+- [FAQ](https://preipokart.in/faq): Common questions about buying, selling, KYC, and fees.
+- [Help](https://preipokart.in/help): Short answers for using the product.
+- [Contact](https://preipokart.in/contact): Bengaluru office and a message form. Email hello@preipokart.in.
+- [Careers](https://preipokart.in/careers): Open roles. Applications go to careers@preipokart.in.
+- [Terms of use](https://preipokart.in/legal/terms): Platform rules.
+- [Privacy policy](https://preipokart.in/legal/privacy): What personal information is collected and why.
+- [Sign up](https://preipokart.in/signup): Create an account with name, email, and password.
+- [Log in](https://preipokart.in/login): Sign in to an existing account.
+
+## Optional
+
+- [Sitemap](https://preipokart.in/sitemap.xml): Public URLs for crawlers.
+- [Full LLM guide](https://preipokart.in/llms-full.txt): Product summary, page map, and what not to crawl.
+- [API reference](https://api.preipokart.in/v1): JSON API used by the site. Public reads include companies, IPOs, blog, FAQ, and legal pages.
+
+## Do not crawl
+
+Signed-in screens are not public content: /dashboard, /portfolio, /orders, /place-order, /profile, /notifications, /kyc, and /biometric.

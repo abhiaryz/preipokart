@@ -11,10 +11,8 @@ export default function BlogPost() {
   const { data: list } = useApi(() => api.listBlog(), []);
   const latest = (list?.data ?? []).filter((item) => item.slug !== slug).slice(0, 4);
 
-  if (!slug) return <Navigate to="/blog" replace />;
-
-  if (!loading && (error || !post)) {
-    return <Navigate to="/blog" replace />;
+  if (!slug || (!loading && (error || !post))) {
+    return <Navigate to="/explore" replace />;
   }
 
   return (

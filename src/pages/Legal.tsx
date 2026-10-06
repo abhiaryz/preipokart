@@ -23,8 +23,7 @@ export default function Legal() {
   const policies = nav?.data ?? [];
   const { data: policy, error, loading } = useApi(() => api.getLegal(slug!), [slug], Boolean(slug));
 
-  if (!slug) return <Navigate to="/legal/terms" replace />;
-  if (!loading && error) return <Navigate to="/legal/terms" replace />;
+  if (!slug || (!loading && error)) return <Navigate to="/explore" replace />;
 
   const minutes = policy ? readMinutes(policy.sections ?? []) : 0;
   const index = policies.findIndex((item) => item.slug === policy?.slug);

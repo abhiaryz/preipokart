@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, FileText, TrendDown, TrendUp } from '@phosphor-icons/react';
 import { CompanyLogo, QueryStatus } from '../components/ui';
 import { api } from '../api';
@@ -177,16 +177,8 @@ export default function StockDetail() {
   const selected = years[yearIndex] ?? years[0];
   const maxAbsRevenue = useMemo(() => Math.max(...years.map((y) => Math.abs(y.revenueCr)), 1), [years]);
 
-  if (!loading && (error || !stock)) {
-    return (
-      <div className="elevation-widget rounded-xl px-6 py-16 text-center">
-        <p className="font-headline-sm text-lg text-on-surface">Company not found</p>
-        <p className="mt-2 font-body-md text-on-surface-variant">This name is not on the current book.</p>
-        <button type="button" className="btn-secondary mt-6" onClick={() => navigate('/explore')}>
-          Back to companies
-        </button>
-      </div>
-    );
+  if (!id || (!loading && (error || !stock))) {
+    return <Navigate to="/explore" replace />;
   }
 
   return (
