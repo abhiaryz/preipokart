@@ -3,7 +3,6 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { api, errorMessage } from './api';
 import { clearSession, hydrateTokensFromStorage, persistSession } from './api/client';
 import type { AuthSession, SessionUser } from './api/types';
-import { authClient } from './lib/auth-client';
 import posthog, { isPostHogConfigured } from './posthog';
 
 export type AuthUser = {
@@ -42,21 +41,12 @@ function identifyUser(user: AuthUser) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const betterSession = authClient.useSession();
   const [apiUser, setApiUser] = useState<AuthUser | null>(null);
   const [apiReady, setApiReady] = useState(false);
   const identified = useRef(false);
 
-  const betterUser: AuthUser | null = betterSession.data?.user
-    ? {
-        id: betterSession.data.user.id,
-        email: betterSession.data.user.email,
-        name: betterSession.data.user.name?.trim() || betterSession.data.user.email.split('@')[0] || 'Investor',
-        mobile: null,
-      }
-    : null;
-  const user = betterUser ?? apiUser;
-  const ready = !betterSession.isPending && apiReady;
+  const user = apiUser;
+  const ready = apiReady;
 
   useEffect(() => {
     let cancelled = false;
@@ -100,11 +90,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const logout = useCallback(async () => {
-    try {
-      await authClient.signOut();
-    } catch {
-      // Better Auth session is cleared locally either way.
-    }
     try {
       await api.logout();
     } catch {

@@ -4,7 +4,6 @@ import { ArrowLeft, ArrowRight, Envelope, GoogleLogo, Phone } from '@phosphor-ic
 import { BrandLogo, Field, InlineNotice } from './ui';
 import { api, errorMessage } from '../api';
 import { safeNextPath, useAuth } from '../auth';
-import { authClient } from '../lib/auth-client';
 import posthog, { isPostHogConfigured } from '../posthog';
 
 type Channel = 'email' | 'mobile';
@@ -116,42 +115,17 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
 
   const onPasswordAuth = async (e: FormEvent) => {
     e.preventDefault();
-    if (!isValidEmail(email.trim()) || password.length < 8) {
-      showError('Enter a valid email and a password of at least 8 characters.');
+    if (isSignup) {
+      showError('Sign up requires OTP in this environment.');
       return;
     }
-    if (isSignup && name.trim().length < 2) {
-      showError('Enter your name.');
+    if (!isValidEmail(email.trim()) || password.length < 8) {
+      showError('Enter a valid email and a password of at least 8 characters.');
       return;
     }
     setBusy(true);
     setError('');
     try {
-      if (isSignup) {
-        const { error } = await authClient.signUp.email({
-          name: name.trim(),
-          email: email.trim(),
-          password,
-        });
-        if (error) {
-          showError(error.message || 'Could not create the account.');
-          return;
-        }
-        if (isPostHogConfigured) posthog.capture('authentication_completed', { mode, method: 'better_auth_signup' });
-        navigate(next);
-        return;
-      }
-
-      const { error } = await authClient.signIn.email({
-        email: email.trim(),
-        password,
-      });
-      if (!error) {
-        if (isPostHogConfigured) posthog.capture('authentication_completed', { mode, method: 'better_auth' });
-        navigate(next);
-        return;
-      }
-
       const session = await api.login(email.trim(), password);
       finishAuth(session, 'password');
     } catch (err) {
@@ -173,8 +147,8 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
         <p className="mt-2 text-on-surface-variant">
           {step === 'identify'
             ? isSignup
-              ? 'Create your account with email and password, or get a 6-digit OTP.'
-              : 'Log in with email and password, or get a 6-digit OTP.'
+              ? 'Create your account with a 6-digit OTP.'
+              : 'Log in with email and password.'
             : `Enter the 6-digit code sent to ${maskedTarget || 'you'}.`}
         </p>
       </div>
@@ -206,20 +180,8 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
             Continue with Google
           </button>
 
-          <form className="flex flex-col gap-5" onSubmit={onPasswordAuth} noValidate>
-              {isSignup ? (
-                <Field id={`${fieldPrefix}-name`} label="Name">
-                  <input
-                    autoComplete="name"
-                    className="field"
-                    id={`${fieldPrefix}-name`}
-                    type="text"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </Field>
-              ) : null}
+          {!isSignup ? (
+            <form className="flex flex-col gap-5" onSubmit={onPasswordAuth} noValidate>
               <Field id={`${fieldPrefix}-email`} label="Email" error={fieldError}>
                 <div className="relative">
                   <Envelope
@@ -242,7 +204,7 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
               </Field>
               <Field id={`${fieldPrefix}-password`} label="Password">
                 <input
-                  autoComplete={isSignup ? 'new-password' : 'current-password'}
+                  autoComplete="current-password"
                   className="field"
                   id={`${fieldPrefix}-password`}
                   type="password"
@@ -251,50 +213,57 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
                 />
               </Field>
               <button className="btn-primary w-full cursor-pointer py-3.5" type="submit" disabled={busy}>
-                {busy ? (isSignup ? 'Creating account…' : 'Logging in…') : isSignup ? 'Create account' : 'Log in'}
+                {busy ? 'Logging in…' : 'Log in'}
                 {busy ? null : <ArrowRight size={18} aria-hidden="true" />}
               </button>
             </form>
+          ) : null}
 
-          <div className="flex items-center gap-3 text-xs text-on-surface-variant" role="separator">
-            <span className="h-px flex-1 bg-outline-variant/50" />
-            {isSignup ? 'Or with OTP' : 'Or log in with OTP'}
-            <span className="h-px flex-1 bg-outline-variant/50" />
-          </div>
-
-          <form
-            className="flex flex-col gap-5"
-            onSubmit={(e: FormEvent) => {
-              e.preventDefault();
-              void sendOtp();
-            }}
-            noValidate
-          >
-            <div className="grid grid-cols-2 gap-2" role="group" aria-label="OTP channel">
-              {(['email', 'mobile'] as const).map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={channel === id}
-                  className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-medium transition duration-200 ${
-                    channel === id
-                      ? 'bg-[#0F4A3D] text-white'
-                      : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
-                  }`}
-                  onClick={() => {
-                    setChannel(id);
-                    setFieldError('');
-                    setError('');
-                  }}
-                >
-                  {id === 'email' ? <Envelope size={16} aria-hidden="true" /> : <Phone size={16} aria-hidden="true" />}
-                  {id === 'email' ? 'Email' : 'Mobile'}
-                </button>
-              ))}
+          {isSignup ? (
+            <div className="flex items-center gap-3 text-xs text-on-surface-variant" role="separator">
+              <span className="h-px flex-1 bg-outline-variant/50" />
+              Sign up with OTP
+              <span className="h-px flex-1 bg-outline-variant/50" />
             </div>
+          ) : null}
 
-            {channel === 'email' ? (
-              isSignup ? (
+          {isSignup ? (
+            <form
+              className="flex flex-col gap-5"
+              onSubmit={(e: FormEvent) => {
+                e.preventDefault();
+                void sendOtp();
+              }}
+              noValidate
+            >
+              <div className="grid grid-cols-2 gap-2" role="group" aria-label="OTP channel">
+                {(['email', 'mobile'] as const).map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={channel === id}
+                    className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-medium transition duration-200 ${
+                      channel === id
+                        ? 'bg-[#0F4A3D] text-white'
+                        : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
+                    }`}
+                    onClick={() => {
+                      setChannel(id);
+                      setFieldError('');
+                      setError('');
+                    }}
+                  >
+                    {id === 'email' ? (
+                      <Envelope size={16} aria-hidden="true" />
+                    ) : (
+                      <Phone size={16} aria-hidden="true" />
+                    )}
+                    {id === 'email' ? 'Email' : 'Mobile'}
+                  </button>
+                ))}
+              </div>
+
+              {channel === 'email' ? (
                 <Field id={`${fieldPrefix}-otp-email`} label="Email" error={fieldError}>
                   <div className="relative">
                     <Envelope
@@ -315,41 +284,39 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
                     />
                   </div>
                 </Field>
-              ) : null
-            ) : (
-              <Field
-                id={`${fieldPrefix}-mobile`}
-                label="Mobile number"
-                error={fieldError}
-                hint="Indian 10-digit number. We will send an SMS OTP."
-              >
-                <div className="flex gap-2">
-                  <span className="field flex min-h-11 w-[4.5rem] shrink-0 items-center justify-center px-0 text-sm">+91</span>
-                  <input
-                    autoComplete="tel-national"
-                    className="field min-w-0 flex-1"
-                    id={`${fieldPrefix}-mobile`}
-                    type="tel"
-                    inputMode="numeric"
-                    maxLength={10}
-                    placeholder="9876543210"
-                    value={mobile}
-                    aria-invalid={Boolean(fieldError)}
-                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  />
-                </div>
-              </Field>
-            )}
+              ) : (
+                <Field
+                  id={`${fieldPrefix}-mobile`}
+                  label="Mobile number"
+                  error={fieldError}
+                  hint="Indian 10-digit number. We will send an SMS OTP."
+                >
+                  <div className="flex gap-2">
+                    <span className="field flex min-h-11 w-[4.5rem] shrink-0 items-center justify-center px-0 text-sm">
+                      +91
+                    </span>
+                    <input
+                      autoComplete="tel-national"
+                      className="field min-w-0 flex-1"
+                      id={`${fieldPrefix}-mobile`}
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="9876543210"
+                      value={mobile}
+                      aria-invalid={Boolean(fieldError)}
+                      onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    />
+                  </div>
+                </Field>
+              )}
 
-            {channel === 'email' && !isSignup ? (
-              <p className="text-sm text-on-surface-variant">We’ll send the OTP to {email.trim() || 'the email above'}.</p>
-            ) : null}
-
-            <button className="btn-secondary mt-1 w-full cursor-pointer py-3.5" type="submit" disabled={busy}>
-              Send 6-digit OTP
-              <ArrowRight size={18} aria-hidden="true" />
-            </button>
-          </form>
+              <button className="btn-secondary mt-1 w-full cursor-pointer py-3.5" type="submit" disabled={busy}>
+                Send 6-digit OTP
+                <ArrowRight size={18} aria-hidden="true" />
+              </button>
+            </form>
+          ) : null}
         </div>
       ) : (
         <form
