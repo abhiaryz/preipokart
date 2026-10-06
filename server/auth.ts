@@ -3,9 +3,6 @@ import { betterAuth } from "better-auth";
 import { getMigrations } from "better-auth/db/migration";
 import { Pool } from "pg";
 
-type Auth = ReturnType<typeof betterAuth>;
-
-let authInstance: Auth | null = null;
 let migrated: Promise<void> | null = null;
 
 function databaseUrl() {
@@ -28,14 +25,12 @@ function databaseUrl() {
   return url.toString();
 }
 
-export function getAuth() {
-  if (authInstance) return authInstance;
-
+function createAuth() {
   const baseURL = (process.env.BETTER_AUTH_URL || "http://localhost:3000").replace(/\/$/, "");
   const basePath = process.env.BETTER_AUTH_PATH || process.env.BETTER_AUTH_APTH || "/api/auth";
   const serverless = process.env.VERCEL === "1";
 
-  authInstance = betterAuth({
+  return betterAuth({
     database: new Pool({
       connectionString: databaseUrl(),
       max: serverless ? 1 : 5,
@@ -62,6 +57,12 @@ export function getAuth() {
     ],
   });
 
+}
+
+let authInstance: ReturnType<typeof createAuth> | null = null;
+
+export function getAuth() {
+  authInstance ??= createAuth();
   return authInstance;
 }
 

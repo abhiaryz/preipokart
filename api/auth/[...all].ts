@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { toNodeHandler } from "better-auth/node";
-import { ensureAuthMigrations, getAuth } from "../../server/auth";
+import { ensureAuthMigrations, getAuth } from "../../server/auth.js";
 
 export const config = {
   api: {
