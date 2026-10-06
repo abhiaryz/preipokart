@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChartLineUp, MagnifyingGlass, Newspaper, TrendUp, type Icon } from '@phosphor-icons/react';
+import { ChartLineUp, MagnifyingGlass, Microphone, Newspaper, TrendUp, type Icon } from '@phosphor-icons/react';
 import { api } from '../api';
 import type { BlogPost, Ipo, StockListItem } from '../api/types';
 import { CompanyLogo } from './ui';
@@ -152,7 +152,7 @@ export function GlobalNavSearch({
         aria-autocomplete="list"
         autoComplete="off"
         placeholder={compact ? 'Search…' : 'Search companies, IPOs, blog…'}
-        className="field h-10 w-full py-2 pl-9 pr-3 text-sm"
+        className="field h-10 w-full py-2 pl-9 pr-10 text-sm"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -166,7 +166,18 @@ export function GlobalNavSearch({
           }
         }}
       />
-
+      <button
+        type="button"
+        className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-on-surface-variant transition-colors hover:bg-on-surface/5 hover:text-primary"
+        aria-label="Voice search (coming soon)"
+        title="Voice search coming soon"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        <Microphone size={16} weight="duotone" aria-hidden="true" />
+      </button>
       {showPanel ? (
         <div
           id={`${inputId}-listbox`}

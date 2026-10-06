@@ -65,6 +65,13 @@ export const api = {
       auth: false,
     }).then(unwrap),
 
+  register: (body: { email: string; password: string; name?: string; mobile?: string }) =>
+    request<Envelope<AuthSession>>('/v1/auth/register', {
+      method: 'POST',
+      body,
+      auth: false,
+    }).then(unwrap),
+
   googleOauth: (idToken: string) =>
     request<Envelope<AuthSession>>('/v1/auth/oauth/google', {
       method: 'POST',

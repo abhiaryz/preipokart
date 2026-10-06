@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Envelope, GoogleLogo, Phone } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Envelope, GoogleLogo, LockKey, Phone } from '@phosphor-icons/react';
 import { BrandLogo, Field, InlineNotice } from './ui';
 import { api, errorMessage } from '../api';
 import { safeNextPath, useAuth } from '../auth';
@@ -8,6 +8,7 @@ import posthog, { isPostHogConfigured } from '../posthog';
 
 type Channel = 'email' | 'mobile';
 type Step = 'identify' | 'otp';
+type AuthMethod = 'password' | 'otp';
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -23,12 +24,14 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const { applySession } = useAuth();
   const next = safeNextPath(searchParams.get('next'));
 
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('password');
   const [channel, setChannel] = useState<Channel>('email');
   const [step, setStep] = useState<Step>('identify');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [challengeId, setChallengeId] = useState('');
   const [maskedTarget, setMaskedTarget] = useState('');
@@ -115,16 +118,47 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
 
   const onPasswordAuth = async (e: FormEvent) => {
     e.preventDefault();
-    if (isSignup) {
-      showError('Sign up requires OTP in this environment.');
-      return;
-    }
-    if (!isValidEmail(email.trim()) || password.length < 8) {
-      showError('Enter a valid email and a password of at least 8 characters.');
-      return;
-    }
-    setBusy(true);
     setError('');
+    setFieldError('');
+
+    if (!isValidEmail(email.trim())) {
+      setFieldError('Enter a valid email address.');
+      showError('There is a problem with your email.');
+      return;
+    }
+    if (password.length < 8) {
+      showError('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (isSignup) {
+      if (password !== confirmPassword) {
+        showError('Passwords do not match.');
+        return;
+      }
+      const mobileDigits = mobile.replace(/\s/g, '');
+      if (mobileDigits && !isValidMobile(mobileDigits)) {
+        showError('Enter a valid 10-digit Indian mobile number, or leave it blank.');
+        return;
+      }
+      setBusy(true);
+      try {
+        const session = await api.register({
+          email: email.trim(),
+          password,
+          name: name.trim() || undefined,
+          mobile: mobileDigits || undefined,
+        });
+        finishAuth(session, 'password');
+      } catch (err) {
+        showError(errorMessage(err, 'Could not create your account. Try again.'));
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
+    setBusy(true);
     try {
       const session = await api.login(email.trim(), password);
       finishAuth(session, 'password');
@@ -135,6 +169,17 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
     }
   };
 
+  const subtitle =
+    step === 'otp'
+      ? `Enter the 6-digit code sent to ${maskedTarget || 'you'}.`
+      : authMethod === 'password'
+        ? isSignup
+          ? 'Create your account with email and password.'
+          : 'Log in with email and password.'
+        : isSignup
+          ? 'Create your account with a 6-digit OTP.'
+          : 'Log in with a 6-digit OTP.';
+
   return (
     <>
       <div className="mb-8">
@@ -144,13 +189,7 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
         <h1 className="font-headline-md text-[28px] tracking-tight text-on-surface">
           {isSignup ? 'Create an account' : 'Log in'}
         </h1>
-        <p className="mt-2 text-on-surface-variant">
-          {step === 'identify'
-            ? isSignup
-              ? 'Create your account with a 6-digit OTP.'
-              : 'Log in with email and password.'
-            : `Enter the 6-digit code sent to ${maskedTarget || 'you'}.`}
-        </p>
+        <p className="mt-2 text-on-surface-variant">{subtitle}</p>
       </div>
 
       {error ? (
@@ -180,8 +219,50 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
             Continue with Google
           </button>
 
-          {!isSignup ? (
+          <div className="grid grid-cols-2 gap-2" role="group" aria-label="Sign-in method">
+            {(
+              [
+                { id: 'password' as const, label: 'Password', icon: LockKey },
+                { id: 'otp' as const, label: 'OTP', icon: Envelope },
+              ] as const
+            ).map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={authMethod === id}
+                className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-medium transition duration-200 ${
+                  authMethod === id
+                    ? 'bg-[#0F4A3D] text-white'
+                    : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
+                }`}
+                onClick={() => {
+                  setAuthMethod(id);
+                  setError('');
+                  setFieldError('');
+                  setInfo('');
+                }}
+              >
+                <Icon size={16} aria-hidden="true" />
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {authMethod === 'password' ? (
             <form className="flex flex-col gap-5" onSubmit={onPasswordAuth} noValidate>
+              {isSignup ? (
+                <Field id={`${fieldPrefix}-name`} label="Name" hint="Optional">
+                  <input
+                    autoComplete="name"
+                    className="field"
+                    id={`${fieldPrefix}-name`}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                  />
+                </Field>
+              ) : null}
+
               <Field id={`${fieldPrefix}-email`} label="Email" error={fieldError}>
                 <div className="relative">
                   <Envelope
@@ -202,32 +283,65 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
                   />
                 </div>
               </Field>
+
+              {isSignup ? (
+                <Field id={`${fieldPrefix}-mobile-optional`} label="Mobile" hint="Optional · Indian 10-digit">
+                  <div className="flex gap-2">
+                    <span className="field flex min-h-11 w-[4.5rem] shrink-0 items-center justify-center px-0 text-sm">
+                      +91
+                    </span>
+                    <input
+                      autoComplete="tel-national"
+                      className="field min-w-0 flex-1"
+                      id={`${fieldPrefix}-mobile-optional`}
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="9876543210"
+                      value={mobile}
+                      onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    />
+                  </div>
+                </Field>
+              ) : null}
+
               <Field id={`${fieldPrefix}-password`} label="Password">
                 <input
-                  autoComplete="current-password"
+                  autoComplete={isSignup ? 'new-password' : 'current-password'}
                   className="field"
                   id={`${fieldPrefix}-password`}
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder={isSignup ? 'At least 8 characters' : undefined}
                 />
               </Field>
+
+              {isSignup ? (
+                <Field id={`${fieldPrefix}-confirm-password`} label="Confirm password">
+                  <input
+                    autoComplete="new-password"
+                    className="field"
+                    id={`${fieldPrefix}-confirm-password`}
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </Field>
+              ) : null}
+
               <button className="btn-primary w-full cursor-pointer py-3.5" type="submit" disabled={busy}>
-                {busy ? 'Logging in…' : 'Log in'}
+                {busy
+                  ? isSignup
+                    ? 'Creating account…'
+                    : 'Logging in…'
+                  : isSignup
+                    ? 'Create account'
+                    : 'Log in'}
                 {busy ? null : <ArrowRight size={18} aria-hidden="true" />}
               </button>
             </form>
-          ) : null}
-
-          {isSignup ? (
-            <div className="flex items-center gap-3 text-xs text-on-surface-variant" role="separator">
-              <span className="h-px flex-1 bg-outline-variant/50" />
-              Sign up with OTP
-              <span className="h-px flex-1 bg-outline-variant/50" />
-            </div>
-          ) : null}
-
-          {isSignup ? (
+          ) : (
             <form
               className="flex flex-col gap-5"
               onSubmit={(e: FormEvent) => {
@@ -311,12 +425,12 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
                 </Field>
               )}
 
-              <button className="btn-secondary mt-1 w-full cursor-pointer py-3.5" type="submit" disabled={busy}>
+              <button className="btn-primary w-full cursor-pointer py-3.5" type="submit" disabled={busy}>
                 Send 6-digit OTP
                 <ArrowRight size={18} aria-hidden="true" />
               </button>
             </form>
-          ) : null}
+          )}
         </div>
       ) : (
         <form
