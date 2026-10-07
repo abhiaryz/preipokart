@@ -78,18 +78,22 @@ const steps = [
   {
     title: 'Browse companies',
     body: 'Explore private companies not yet listed on NSE or BSE, with sector, price, and implied valuation.',
+    icon: '/how-it-works/browse-companies.webp?v=2',
   },
   {
     title: 'Complete KYC',
     body: 'Verify your identity from your profile. Both sides of every deal must be KYC-checked before a match.',
+    icon: '/how-it-works/complete-kyc.webp?v=2',
   },
   {
     title: 'Place a buy or sell request',
     body: 'Set your price and quantity. We match your request with someone on the other side of the book.',
+    icon: '/how-it-works/buy-sell.webp?v=2',
   },
   {
     title: 'Settle with escrow',
     body: 'Money is held safely until the deal completes. Track every step from your dashboard.',
+    icon: '/how-it-works/escrow.webp?v=2',
   },
 ];
 
@@ -289,20 +293,27 @@ export default function Landing() {
 
             <ol className="relative mt-14 grid gap-12 sm:grid-cols-2 md:mt-16 lg:grid-cols-4 lg:gap-8">
               <div
-                className="pointer-events-none absolute left-[12.5%] right-[12.5%] top-5 hidden h-px bg-gradient-to-r from-transparent via-outline-variant/50 to-transparent lg:block"
+                className="pointer-events-none absolute left-[12.5%] right-[12.5%] top-[8rem] hidden h-px bg-gradient-to-r from-transparent via-outline-variant/50 to-transparent lg:block"
                 aria-hidden="true"
               />
               {steps.map((step, index) => (
-                <li key={step.title} className="relative text-center lg:text-left">
+                <li key={step.title} className="relative text-center">
                   <PopIn delay={index * 90} lift={false}>
                     <article>
-                      <span className="relative z-[1] mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-primary-container/25 bg-canvas font-data-md text-sm text-primary lg:mx-0">
+                      <img
+                        src={step.icon}
+                        alt=""
+                        width={384}
+                        height={384}
+                        className="mx-auto h-24 w-24 object-contain"
+                      />
+                      <span className="relative z-[1] mx-auto mt-3 flex h-10 w-10 items-center justify-center rounded-full border border-primary-container/25 bg-canvas font-data-md text-sm text-primary">
                         {index + 1}
                       </span>
                       <h3 className="mt-5 font-headline-sm text-xl tracking-tight md:text-[1.35rem]">
                         {step.title}
                       </h3>
-                      <p className="mt-2.5 text-sm leading-relaxed text-on-surface-variant lg:max-w-[28ch]">
+                      <p className="mx-auto mt-2.5 max-w-[28ch] text-sm leading-relaxed text-on-surface-variant">
                         {step.body}
                       </p>
                     </article>
