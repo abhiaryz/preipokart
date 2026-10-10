@@ -1,6 +1,6 @@
-# PreIPOKart — https://preipokart.in
-# LLM-readable guide: https://preipokart.in/llms.txt
-# Longer guide: https://preipokart.in/llms-full.txt
+# PreIPOKart — https://www.preipokart.com
+# LLM-readable guide: https://www.preipokart.com/llms.txt
+# Longer guide: https://www.preipokart.com/llms-full.txt
 
 User-agent: *
 Allow: /
@@ -43,4 +43,4 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://preipokart.in/sitemap.xml
+Sitemap: https://www.preipokart.com/sitemap.xml

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   ArrowRight,
   BookOpenText,
+  Calculator,
   ChartScatter,
+  Stamp,
   ChatCircleDots,
   List,
   PaperPlaneTilt,
@@ -24,6 +26,8 @@ const links: Array<{ label: string; to: string; icon: Icon }> = [
   { label: 'Screener', to: '/explore/screener', icon: ChartScatter },
   { label: 'IPOs', to: '/ipos', icon: RocketLaunch },
   { label: 'Blog / News', to: '/blog', icon: BookOpenText },
+  { label: 'ROI calculator', to: '/roi-calculator', icon: Calculator },
+  { label: 'Stamp duty', to: '/stamp-duty', icon: Stamp },
   { label: 'FAQ', to: '/faq', icon: ChatCircleDots },
   { label: 'Contact us', to: '/contact', icon: PaperPlaneTilt },
 ];
@@ -49,12 +53,16 @@ function NavIconLink({
   );
 }
 
+const headerLinks = links.filter((link) => link.to !== '/stamp-duty');
+
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const screenerActive = location.pathname.startsWith('/explore') || location.pathname.startsWith('/stocks');
   const blogActive = location.pathname.startsWith('/blog');
   const iposActive = location.pathname.startsWith('/ipos');
+  const roiActive = location.pathname.startsWith('/roi-calculator');
+  const stampActive = location.pathname.startsWith('/stamp-duty');
   const faqActive = location.pathname.startsWith('/faq');
   const contactActive = location.pathname.startsWith('/contact');
 
@@ -63,6 +71,8 @@ export function SiteHeader() {
       (to === '/explore/screener' && screenerActive) ||
       (to === '/blog' && blogActive) ||
       (to === '/ipos' && iposActive) ||
+      (to === '/roi-calculator' && roiActive) ||
+      (to === '/stamp-duty' && stampActive) ||
       (to === '/faq' && faqActive) ||
       (to === '/contact' && contactActive);
     return `btn-ghost min-h-11 px-3 ${active ? 'text-on-surface' : ''}`;
@@ -78,11 +88,11 @@ export function SiteHeader() {
         <GlobalNavSearch className="mx-1 w-full max-w-md flex-1" compact />
 
         <nav className="hidden items-center gap-0.5 xl:flex" aria-label="Page">
-          {links.slice(0, 2).map(({ label, to, icon }) => (
+          {headerLinks.slice(0, 2).map(({ label, to, icon }) => (
             <NavIconLink key={to} to={to} label={label} icon={icon} className={navClass(to)} />
           ))}
           <RaiseNavMenu />
-          {links.slice(2).map(({ label, to, icon }) => (
+          {headerLinks.slice(2).map(({ label, to, icon }) => (
             <NavIconLink key={to} to={to} label={label} icon={icon} className={navClass(to)} />
           ))}
         </nav>
@@ -145,6 +155,32 @@ export function SiteHeader() {
   );
 }
 
+type PreferredSourceApi = {
+  init: (options?: { theme?: 'light' | 'dark' | 'auto'; lang?: string }) => void;
+};
+
+function PreferredSourceButton() {
+  useEffect(() => {
+    const boot = (preferredSource: PreferredSourceApi) => {
+      preferredSource.init({ theme: 'light', lang: 'en' });
+    };
+    const win = window as Window & {
+      PREFERRED_SOURCE?: { push: (callback: (api: PreferredSourceApi) => void) => void } | Array<(api: PreferredSourceApi) => void>;
+    };
+    const queue = (win.PREFERRED_SOURCE = win.PREFERRED_SOURCE || []);
+    queue.push(boot);
+  }, []);
+
+  return (
+    <div
+      className="mt-4"
+      data-theme="light"
+      data-lang="en"
+      {...{ 'google-add-preferred-source-btn': '' }}
+    />
+  );
+}
+
 export function SiteFooter() {
   const { data } = useApi(() => api.listLegal(), []);
   const policyNav = (data?.data ?? []).map((item) => ({ to: `/legal/${item.slug}`, label: item.title }));
@@ -159,6 +195,7 @@ export function SiteFooter() {
           <p className="mt-3 max-w-[36ch] text-sm text-on-surface-variant">
             Dummy request book for unlisted shares in India. Not a live exchange. Unlisted equity is risky and may be illiquid.
           </p>
+          <PreferredSourceButton />
         </div>
 
         <div className="grid gap-8 sm:grid-cols-3">
@@ -192,6 +229,16 @@ export function SiteFooter() {
           <div>
             <p className="font-label-caps text-label-caps uppercase text-on-surface">Support</p>
             <ul className="mt-3 space-y-2 text-sm">
+              <li>
+                <Link to="/roi-calculator" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
+                  ROI calculator
+                </Link>
+              </li>
+              <li>
+                <Link to="/stamp-duty" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
+                  Stamp duty
+                </Link>
+              </li>
               <li>
                 <Link to="/faq" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
                   FAQ

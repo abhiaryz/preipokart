@@ -21,6 +21,8 @@ const Help = lazy(() => import('./pages/Help'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const Faq = lazy(() => import('./pages/Faq'));
+const RoiCalculator = lazy(() => import('./pages/RoiCalculator'));
+const StampDutyCalculator = lazy(() => import('./pages/StampDutyCalculator'));
 const IPOs = lazy(() => import('./pages/IPOs'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Careers = lazy(() => import('./pages/Careers'));
@@ -52,6 +54,8 @@ function App() {
             <Route path="blog" element={<Blog />} />
             <Route path="blog/:slug" element={<BlogPost />} />
             <Route path="faq" element={<Faq />} />
+            <Route path="roi-calculator" element={<RoiCalculator />} />
+            <Route path="stamp-duty" element={<StampDutyCalculator />} />
             <Route path="ipos" element={<IPOs />} />
             <Route path="raise/:slug" element={<RaisePage />} />
             <Route path="contact" element={<Contact />} />

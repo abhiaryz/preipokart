@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   Bank,
+  Calculator,
   CaretDown,
   ChartLineUp,
   CheckCircle,
@@ -10,6 +11,7 @@ import {
   Minus,
   Plus,
   ShieldCheck,
+  Stamp,
   TrendUp,
   UsersThree,
   Vault,
@@ -144,6 +146,21 @@ const testimonials = [
     role: 'Angel investor, Hyderabad',
     image:
       'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=160&h=160&q=80',
+  },
+];
+
+const calculators = [
+  {
+    to: '/stamp-duty',
+    title: 'STT & stamp duty',
+    body: 'See securities transaction tax and stamp duty on an unlisted or listed share transfer, and which side each charge falls on.',
+    icon: Stamp,
+  },
+  {
+    to: '/roi-calculator',
+    title: 'ROI calculator',
+    body: 'Estimate what an investment could be worth from the amount you put in, an annual return, and how long you hold it.',
+    icon: Calculator,
   },
 ];
 
@@ -365,6 +382,40 @@ export default function Landing() {
               })}
             </ul>
           </div>
+        </section>
+
+        {/* Calculators */}
+        <section id="calculators" className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8">
+          <SectionHeading
+            label="Tools"
+            title="Calculators"
+            description="Estimate transaction charges and a holding's return before you place a request."
+          />
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+            {calculators.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.to} className="h-full">
+                  <PopIn delay={index * 80} className="h-full">
+                    <Link
+                      to={item.to}
+                      className="card group flex h-full flex-col p-6 transition duration-200 hover:border-primary-container/35 hover:bg-surface-container-low/40"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-outline-variant/40 bg-surface-container-low text-primary">
+                        <Icon size={22} weight="duotone" aria-hidden="true" />
+                      </span>
+                      <h3 className="mt-5 font-headline-sm text-xl tracking-tight">{item.title}</h3>
+                      <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-on-surface-variant">{item.body}</p>
+                      <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-[#0f4a3d]">
+                        Open calculator
+                        <ArrowRight size={16} className="transition duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
+                      </span>
+                    </Link>
+                  </PopIn>
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
         {/* Companies */}
