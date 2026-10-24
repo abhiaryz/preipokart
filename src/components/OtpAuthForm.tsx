@@ -57,6 +57,12 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
     return () => window.clearTimeout(timer);
   }, [resendIn]);
 
+  useEffect(() => {
+    if (searchParams.get('reason') === 'timeout') {
+      setInfo('Your session was locked due to 15 minutes of inactivity. Please log in to continue.');
+    }
+  }, [searchParams]);
+
   const showError = (message: string) => {
     setError(message);
     window.requestAnimationFrame(() => errorRef.current?.focus());

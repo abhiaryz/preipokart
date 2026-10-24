@@ -9,6 +9,23 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
     <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM site guide" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://news.google.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' http://localhost:* http://127.0.0.1:* https://*.preipokart.com https://preipokart.com https://*.supabase.co wss://* ws://* https://www.google-analytics.com https://analytics.google.com https://*.posthog.com; frame-src 'self' https://www.google.com https://news.google.com; object-src 'none'; base-uri 'self';"
+    />
+    <script>
+      // Defensive clickjacking frame-busting safeguard
+      if (window.top !== window.self) {
+        try {
+          window.top.location = window.self.location;
+        } catch (_) {
+          // If framed cross-origin and navigation is restricted, blank out the UI
+          document.documentElement.style.display = 'none';
+        }
+      }
+    </script>
     <script async src="https://news.google.com/swg/js/v1/publisher.js"></script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FYH36W0FK"></script>

@@ -125,8 +125,32 @@ export type StockFinancial = {
   year: string;
   revenueCr: number;
   ebitdaCr: number;
+  pbtCr?: number;
   patCr: number;
+  eps?: number;
+  opmPct?: number;
   employees: number;
+  shareCapitalCr?: number;
+  reservesCr?: number;
+  borrowingsCr?: number;
+  totalAssetsCr?: number;
+  totalLiabilitiesCr?: number;
+  investmentsCr?: number;
+  cfoCr?: number;
+  cfInvestingCr?: number;
+  cfFinancingCr?: number;
+  netCashCr?: number;
+  cashAtEndCr?: number;
+};
+
+export type StockShareholding = {
+  id?: string;
+  year: string;
+  promotersPct: number;
+  institutionsPct: number;
+  retailPublicPct: number;
+  esopOthersPct: number;
+  notes?: string | null;
 };
 
 export type StockDetail = StockListItem & {
@@ -137,8 +161,19 @@ export type StockDetail = StockListItem & {
   website?: string | null;
   employees?: string | null;
   lastFunding?: string | null;
+  isin?: string | null;
+  pan?: string | null;
+  faceValue?: number | null;
+  bookValue?: number | null;
+  roe?: number | null;
+  debtToEquity?: number | null;
+  week52High?: number | null;
+  week52Low?: number | null;
+  peRatio?: number | null;
+  pbRatio?: number | null;
   documents?: StockDocument[];
   financials?: StockFinancial[];
+  shareholdings?: StockShareholding[];
 };
 
 export type ChartPoint = {
@@ -289,6 +324,7 @@ export type BlogPost = {
   cover?: string | null;
   inlineImage?: string | null;
   body?: string[];
+  bodyMarkdown?: string | null;
 };
 
 export type FaqItem = {
@@ -314,6 +350,33 @@ export type LegalPolicy = {
 export type OfficeHours = {
   day: string;
   time: string;
+};
+
+export type SupportTicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
+export type SupportMessage = {
+  id: string;
+  authorType: 'user' | 'staff';
+  body: string;
+  createdAt: string;
+};
+
+export type SupportTicketSummary = {
+  id: string;
+  subject: string;
+  status: SupportTicketStatus;
+  createdAt: string;
+  updatedAt: string;
+  lastMessagePreview?: string | null;
+};
+
+export type SupportTicketDetail = {
+  id: string;
+  subject: string;
+  status: SupportTicketStatus;
+  createdAt: string;
+  updatedAt: string;
+  messages: SupportMessage[];
 };
 
 export type ContactOffice = {

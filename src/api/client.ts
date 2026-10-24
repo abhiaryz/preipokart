@@ -1,6 +1,7 @@
 import type { ApiErrorBody, AuthSession } from './types';
 
-const SESSION_KEY = 'preipokart-session';
+export const SESSION_STORAGE_KEY = 'preipokart-session';
+const SESSION_KEY = SESSION_STORAGE_KEY;
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? '';
 
@@ -35,6 +36,11 @@ function readStoredSession(): StoredSession | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredSession;
     if (!parsed?.accessToken && !parsed?.refreshToken) return null;
+    // Stale session validation: if expired and no refresh token available, purge immediately
+    if (parsed.expiresAt && Date.now() > parsed.expiresAt && !parsed.refreshToken) {
+      clearSession();
+      return null;
+    }
     return parsed;
   } catch {
     return null;

@@ -1,6 +1,19 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Buildings, CheckCircle, Envelope, Eye, EyeSlash, Lock, Phone, User } from '@phosphor-icons/react';
+import {
+  Buildings,
+  CheckCircle,
+  Envelope,
+  Eye,
+  EyeSlash,
+  IdentificationCard,
+  Key,
+  Lock,
+  Phone,
+  ShieldCheck,
+  User,
+  UsersThree,
+} from '@phosphor-icons/react';
 import { Field, InlineNotice, PageHeader, QueryStatus } from '../components/ui';
 import { api, errorMessage } from '../api';
 import type { NomineeRelationship } from '../api/types';
@@ -8,11 +21,11 @@ import { useApi } from '../hooks/useApi';
 import posthog, { isPostHogConfigured } from '../posthog';
 
 const tabs = [
-  { id: 'details', label: 'Your details' },
-  { id: 'password', label: 'Password' },
-  { id: 'kyc', label: 'KYC' },
-  { id: 'nominee', label: 'Nominee' },
-  { id: 'demat', label: 'CDSL & NSDL' },
+  { id: 'details', label: 'Your details', shortLabel: 'Details', icon: User },
+  { id: 'password', label: 'Password', shortLabel: 'Password', icon: Key },
+  { id: 'kyc', label: 'KYC', shortLabel: 'KYC', icon: IdentificationCard },
+  { id: 'nominee', label: 'Nominee', shortLabel: 'Nominee', icon: UsersThree },
+  { id: 'demat', label: 'CDSL & NSDL', shortLabel: 'Demat', icon: Buildings },
 ] as const;
 
 type TabId = (typeof tabs)[number]['id'];
@@ -28,6 +41,129 @@ function initials(name: string) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('') || 'PK';
+}
+
+type StatusTone = 'success' | 'warning' | 'neutral' | 'error';
+
+function statusToneClasses(tone: StatusTone) {
+  switch (tone) {
+    case 'success':
+      return 'border-bid/30 bg-bid/10 text-bid';
+    case 'warning':
+      return 'border-accent/40 bg-accent/10 text-on-surface';
+    case 'error':
+      return 'border-ask/30 bg-ask/10 text-ask';
+    default:
+      return 'border-outline-variant/50 bg-surface-container-low text-on-surface-variant';
+  }
+}
+
+function StatusChip({ label, detail, tone }: { label: string; detail: string; tone: StatusTone }) {
+  return (
+    <div className={`rounded-xl border px-3 py-2.5 ${statusToneClasses(tone)}`}>
+      <p className="text-[10px] font-medium uppercase tracking-wide opacity-80">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold leading-snug">{detail}</p>
+    </div>
+  );
+}
+
+function kycStatusPresentation(status: string): { detail: string; tone: StatusTone } {
+  switch (status) {
+    case 'verified':
+      return { detail: 'Verified', tone: 'success' };
+    case 'pending':
+    case 'submitted':
+      return { detail: 'Under review', tone: 'warning' };
+    case 'rejected':
+      return { detail: 'Needs update', tone: 'error' };
+    default:
+      return { detail: 'Not submitted', tone: 'neutral' };
+  }
+}
+
+function profileSetupProgress(input: {
+  hasBasics: boolean;
+  kycVerified: boolean;
+  hasNominee: boolean;
+  dematConnected: boolean;
+}) {
+  const steps = [input.hasBasics, input.kycVerified, input.hasNominee, input.dematConnected];
+  const done = steps.filter(Boolean).length;
+  return { done, total: steps.length, percent: Math.round((done / steps.length) * 100) };
+}
+
+const tabDescriptions: Record<TabId, string> = {
+  details: 'Contact information used for orders and account alerts.',
+  password: 'Change your sign-in password. Use a strong password you do not reuse elsewhere.',
+  kyc: 'Verify your identity with PAN and Aadhaar before you trade.',
+  nominee: 'Register who should receive your holdings if needed.',
+  demat: 'Link CDSL or NSDL so shares can move after settlement.',
+};
+
+const profileSectionMinHeight = 'min-h-[min(720px,calc(100dvh-13rem))]';
+
+function ProfilePanel({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className={`card flex ${profileSectionMinHeight} flex-col overflow-hidden`}>
+      <div className="shrink-0 border-b border-outline-variant/30 bg-surface-container-low px-5 py-4 sm:px-6">
+        <h2 className="text-lg font-semibold tracking-tight text-on-surface">{title}</h2>
+        {description ? <p className="mt-1 max-w-prose text-sm leading-relaxed text-on-surface-variant">{description}</p> : null}
+      </div>
+      <div className="flex flex-1 flex-col p-5 sm:p-6">{children}</div>
+    </section>
+  );
+}
+
+function ProfileFormActions({ children }: { children: ReactNode }) {
+  return (
+    <div className="mt-auto border-t border-outline-variant/25 pt-5">
+      {children}
+    </div>
+  );
+}
+
+function TabButton({
+  active,
+  label,
+  shortLabel,
+  icon: Icon,
+  onClick,
+  layout,
+}: {
+  active: boolean;
+  label: string;
+  shortLabel: string;
+  icon: typeof User;
+  onClick: () => void;
+  layout: 'row' | 'stack';
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={`flex cursor-pointer items-center gap-2 rounded-xl text-sm font-medium transition duration-200 ${
+        layout === 'stack' ? 'w-full px-3 py-2.5 text-left' : 'min-h-10 shrink-0 whitespace-nowrap px-3 py-2'
+      } ${
+        active
+          ? 'bg-primary text-on-primary shadow-sm'
+          : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+      }`}
+    >
+      <Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden="true" />
+      <span className={layout === 'row' ? 'sm:hidden' : ''}>{shortLabel}</span>
+      <span className={layout === 'row' ? 'hidden sm:inline' : ''}>{label}</span>
+    </button>
+  );
 }
 
 export default function Profile() {
@@ -200,49 +336,126 @@ export default function Profile() {
   const kycStatus = kyc.data?.status ?? profile.data?.kycStatus ?? 'unverified';
   const cdslConnected = Boolean(demat.data?.cdsl.connected);
   const nsdlConnected = Boolean(demat.data?.nsdl.connected);
-
+  const kycPresentation = kycStatusPresentation(kycStatus);
+  const dematAnyConnected = cdslConnected || nsdlConnected;
+  const setup = profileSetupProgress({
+    hasBasics: Boolean(name.trim() && email.trim() && phone.trim()),
+    kycVerified: kycStatus === 'verified',
+    hasNominee: Boolean(nominee.data?.name?.trim()),
+    dematConnected: dematAnyConnected,
+  });
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <PageHeader
-        title="Profile"
-        description="Update your details, password, KYC, nominee, and connect your CDSL or NSDL demat account."
+        title="Profile & account"
+        description="Manage personal details, security, compliance, and demat connections in one place."
       />
 
       <QueryStatus loading={loading && !profile.data} error={loadError}>
-        <div className="card mb-6 flex items-center gap-4 p-5">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-container text-lg font-semibold text-on-primary-container">
-            {initials(name || profile.data?.email || 'PK')}
-          </span>
-          <div>
-            <p className="font-medium">{name || profile.data?.email}</p>
-            <p className="text-sm text-on-surface-variant">
-              KYC: {kycStatus} · Nominee: {nominee.data?.name ?? 'Not added'} · CDSL:{' '}
-              {cdslConnected ? 'Connected' : 'Not connected'} · NSDL: {nsdlConnected ? 'Connected' : 'Not connected'}
-            </p>
+        <section className="card overflow-hidden">
+          <div className="relative bg-gradient-to-br from-primary-container/80 via-surface to-surface-container-low p-5 sm:p-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-xl font-semibold text-on-primary shadow-sm ring-4 ring-surface/80">
+                  {initials(name || profile.data?.email || 'PK')}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-xl font-semibold tracking-tight text-on-surface">{name || profile.data?.email}</p>
+                  <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-on-surface-variant">
+                    {email ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Envelope size={14} aria-hidden="true" />
+                        {email}
+                      </span>
+                    ) : null}
+                    {phone ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Phone size={14} aria-hidden="true" />
+                        {phone}
+                      </span>
+                    ) : null}
+                  </p>
+                </div>
+              </div>
+              <div className="w-full max-w-xs rounded-xl border border-outline-variant/40 bg-surface/90 p-4 backdrop-blur-sm sm:w-auto">
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="font-medium text-on-surface">Account setup</span>
+                  <span className="font-mono text-on-surface-variant">
+                    {setup.done}/{setup.total}
+                  </span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-container-high">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-500"
+                    style={{ width: `${setup.percent}%` }}
+                    role="progressbar"
+                    aria-valuenow={setup.percent}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label="Profile setup progress"
+                  />
+                </div>
+                <p className="mt-2 text-xs text-on-surface-variant">
+                  {setup.percent === 100 ? 'You are ready to trade.' : 'Complete KYC, nominee, and demat to unlock the full flow.'}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+          <div className="grid gap-2 border-t border-outline-variant/30 bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatusChip label="KYC" detail={kycPresentation.detail} tone={kycPresentation.tone} />
+            <StatusChip
+              label="Nominee"
+              detail={nominee.data?.name ? nominee.data.name : 'Not added'}
+              tone={nominee.data?.name ? 'success' : 'neutral'}
+            />
+            <StatusChip label="CDSL" detail={cdslConnected ? 'Connected' : 'Not linked'} tone={cdslConnected ? 'success' : 'neutral'} />
+            <StatusChip label="NSDL" detail={nsdlConnected ? 'Connected' : 'Not linked'} tone={nsdlConnected ? 'success' : 'neutral'} />
+          </div>
+        </section>
 
-        <div className="mb-4 flex gap-1 overflow-x-auto rounded-lg bg-surface-container-low p-1" role="tablist" aria-label="Profile sections">
-          {tabs.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={tab === item.id}
-              className={`min-h-10 cursor-pointer whitespace-nowrap rounded-md px-3 text-sm font-medium transition duration-200 ${
-                tab === item.id
-                  ? 'bg-[#0F4A3D] text-white'
-                  : 'text-on-surface-variant hover:text-on-surface'
-              }`}
-              onClick={() => setTab(item.id)}
+        <div className="grid gap-6 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-stretch">
+          <aside className="hidden lg:block">
+            <nav
+              className={`card sticky top-24 flex ${profileSectionMinHeight} flex-col gap-1 p-2`}
+              role="tablist"
+              aria-label="Profile sections"
             >
-              {item.label}
-            </button>
-          ))}
-        </div>
+              {tabs.map((item) => (
+                <TabButton
+                  key={item.id}
+                  active={tab === item.id}
+                  label={item.label}
+                  shortLabel={item.shortLabel}
+                  icon={item.icon}
+                  layout="stack"
+                  onClick={() => setTab(item.id)}
+                />
+              ))}
+            </nav>
+          </aside>
+
+          <div className={`flex min-w-0 flex-col gap-4 ${profileSectionMinHeight}`}>
+            <nav
+              className="card flex shrink-0 gap-1 overflow-x-auto p-1.5 lg:hidden"
+              role="tablist"
+              aria-label="Profile sections"
+            >
+              {tabs.map((item) => (
+                <TabButton
+                  key={item.id}
+                  active={tab === item.id}
+                  label={item.label}
+                  shortLabel={item.shortLabel}
+                  icon={item.icon}
+                  layout="row"
+                  onClick={() => setTab(item.id)}
+                />
+              ))}
+            </nav>
 
         {tab === 'details' && (
-          <form className="card space-y-5 p-5" onSubmit={(e) => void onSaveDetails(e)}>
+          <ProfilePanel title="Your details" description={tabDescriptions.details}>
+          <form className="flex flex-1 flex-col gap-5" onSubmit={(e) => void onSaveDetails(e)}>
             {detailsSaved ? (
               <InlineNotice tone="success">
                 <span className="inline-flex items-center gap-2">
@@ -278,14 +491,18 @@ export default function Profile() {
                 <input id="dob" type="date" className="field" value={dob} onChange={(e) => setDob(e.target.value)} />
               </Field>
             </div>
-            <button className="btn-primary" type="submit">
-              Save details
-            </button>
+            <ProfileFormActions>
+              <button className="btn-primary" type="submit">
+                Save details
+              </button>
+            </ProfileFormActions>
           </form>
+          </ProfilePanel>
         )}
 
         {tab === 'password' && (
-          <form className="card space-y-5 p-5" onSubmit={(e) => void onChangePassword(e)}>
+          <ProfilePanel title="Password" description={tabDescriptions.password}>
+          <form className="flex flex-1 flex-col gap-5" onSubmit={(e) => void onChangePassword(e)}>
             {passwordNotice === 'ok' ? <InlineNotice tone="success">Password updated.</InlineNotice> : null}
             {passwordNotice && passwordNotice !== 'ok' ? (
               <InlineNotice tone="error">
@@ -335,17 +552,22 @@ export default function Profile() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </Field>
-            <button className="btn-primary" type="submit">
-              Update password
-            </button>
+            <ProfileFormActions>
+              <button className="btn-primary" type="submit">
+                Update password
+              </button>
+            </ProfileFormActions>
           </form>
+          </ProfilePanel>
         )}
 
         {tab === 'kyc' && (
-          <form className="card space-y-5 p-5" onSubmit={(e) => void onSubmitKyc(e)}>
-            <p className="text-sm text-on-surface-variant">
-              KYC confirms who you are so you can buy and sell. Enter the same PAN and Aadhaar linked to your demat account.
-            </p>
+          <ProfilePanel title="KYC verification" description={tabDescriptions.kyc}>
+          <form className="flex flex-1 flex-col gap-5" onSubmit={(e) => void onSubmitKyc(e)}>
+            <div className="flex items-start gap-3 rounded-xl border border-outline-variant/40 bg-surface-container-low p-4 text-sm text-on-surface-variant">
+              <ShieldCheck className="mt-0.5 shrink-0 text-primary" size={20} aria-hidden="true" />
+              <p>Use the same PAN and Aadhaar linked to your demat account. We review submissions within one business day.</p>
+            </div>
             {kyc.data?.status && kyc.data.status !== 'unverified' ? (
               <InlineNotice tone={kyc.data.status === 'rejected' ? 'error' : 'info'}>
                 Status: {kyc.data.status}
@@ -373,17 +595,18 @@ export default function Profile() {
                 onChange={(e) => setAadhaar(e.target.value)}
               />
             </Field>
-            <button className="btn-primary" type="submit">
-              Submit KYC
-            </button>
+            <ProfileFormActions>
+              <button className="btn-primary" type="submit">
+                Submit KYC
+              </button>
+            </ProfileFormActions>
           </form>
+          </ProfilePanel>
         )}
 
         {tab === 'nominee' && (
-          <form className="card space-y-5 p-5" onSubmit={(e) => void onSaveNominee(e)}>
-            <p className="text-sm text-on-surface-variant">
-              A nominee is the person who receives your PreIPOKart holdings if something happens to you. You can change this later.
-            </p>
+          <ProfilePanel title="Nominee" description={tabDescriptions.nominee}>
+          <form className="flex flex-1 flex-col gap-5" onSubmit={(e) => void onSaveNominee(e)}>
             {nomineeSaved ? <InlineNotice tone="success">Nominee saved.</InlineNotice> : null}
             {nomineeError ? <InlineNotice tone="error">{nomineeError}</InlineNotice> : null}
             <Field id="nominee-name" label="Full name">
@@ -445,17 +668,22 @@ export default function Profile() {
                 onChange={(e) => setNomineePan(e.target.value.toUpperCase())}
               />
             </Field>
-            <button className="btn-primary" type="submit">
-              Save nominee
-            </button>
+            <ProfileFormActions>
+              <button className="btn-primary" type="submit">
+                Save nominee
+              </button>
+            </ProfileFormActions>
           </form>
+          </ProfilePanel>
         )}
 
         {tab === 'demat' && (
-          <div className="space-y-4">
+          <ProfilePanel title="CDSL & NSDL" description={tabDescriptions.demat}>
+            <div className="flex flex-1 flex-col gap-4">
             {dematError ? <InlineNotice tone="error">{dematError}</InlineNotice> : null}
-            <section className="card space-y-4 p-5">
-              <div className="flex items-start justify-between gap-3">
+            <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
+            <section className="card flex h-full min-h-[20rem] flex-col overflow-hidden">
+              <div className="flex items-start justify-between gap-3 border-b border-outline-variant/30 bg-surface-container-low px-5 py-4">
                 <div>
                   <h2 className="flex items-center gap-2 text-lg font-semibold">
                     <Buildings size={20} aria-hidden="true" />
@@ -466,19 +694,21 @@ export default function Profile() {
                     {demat.data?.cdsl.boIdLast4 ? ` Linked ••••${demat.data.cdsl.boIdLast4}` : ''}
                   </p>
                 </div>
-                <span className="rounded-md border border-on-surface/15 px-2 py-1 text-xs">
+                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${cdslConnected ? statusToneClasses('success') : statusToneClasses('neutral')}`}>
                   {cdslConnected ? 'Connected' : 'Not connected'}
                 </span>
               </div>
+              <div className="flex flex-1 flex-col space-y-4 p-5">
               <Field id="cdsl-dp" label="DP ID">
                 <input id="cdsl-dp" className="field" placeholder="12000000" value={cdslDp} onChange={(e) => setCdslDp(e.target.value)} />
               </Field>
               <Field id="cdsl-bo" label="BO ID (16 digits)">
                 <input id="cdsl-bo" className="field" placeholder="1200000000000000" value={cdslBo} onChange={(e) => setCdslBo(e.target.value)} />
               </Field>
+              <div className="mt-auto border-t border-outline-variant/25 pt-4">
               <button
                 type="button"
-                className={cdslConnected ? 'btn-secondary' : 'btn-primary'}
+                className={cdslConnected ? 'btn-secondary w-full sm:w-auto' : 'btn-primary w-full sm:w-auto'}
                 onClick={() => {
                   void (async () => {
                     setDematError('');
@@ -500,10 +730,12 @@ export default function Profile() {
               >
                 {cdslConnected ? 'Disconnect CDSL' : 'Connect CDSL'}
               </button>
+              </div>
+              </div>
             </section>
 
-            <section className="card space-y-4 p-5">
-              <div className="flex items-start justify-between gap-3">
+            <section className="card flex h-full min-h-[20rem] flex-col overflow-hidden">
+              <div className="flex items-start justify-between gap-3 border-b border-outline-variant/30 bg-surface-container-low px-5 py-4">
                 <div>
                   <h2 className="flex items-center gap-2 text-lg font-semibold">
                     <Buildings size={20} aria-hidden="true" />
@@ -514,10 +746,11 @@ export default function Profile() {
                     {demat.data?.nsdl.clientIdLast4 ? ` Linked ••••${demat.data.nsdl.clientIdLast4}` : ''}
                   </p>
                 </div>
-                <span className="rounded-md border border-on-surface/15 px-2 py-1 text-xs">
+                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${nsdlConnected ? statusToneClasses('success') : statusToneClasses('neutral')}`}>
                   {nsdlConnected ? 'Connected' : 'Not connected'}
                 </span>
               </div>
+              <div className="flex flex-1 flex-col space-y-4 p-5">
               <Field id="nsdl-dp" label="DP ID">
                 <input id="nsdl-dp" className="field" placeholder="IN300000" value={nsdlDp} onChange={(e) => setNsdlDp(e.target.value)} />
               </Field>
@@ -530,9 +763,10 @@ export default function Profile() {
                   onChange={(e) => setNsdlClient(e.target.value)}
                 />
               </Field>
+              <div className="mt-auto border-t border-outline-variant/25 pt-4">
               <button
                 type="button"
-                className={nsdlConnected ? 'btn-secondary' : 'btn-primary'}
+                className={nsdlConnected ? 'btn-secondary w-full sm:w-auto' : 'btn-primary w-full sm:w-auto'}
                 onClick={() => {
                   void (async () => {
                     setDematError('');
@@ -554,9 +788,15 @@ export default function Profile() {
               >
                 {nsdlConnected ? 'Disconnect NSDL' : 'Connect NSDL'}
               </button>
+              </div>
+              </div>
             </section>
-          </div>
+            </div>
+            </div>
+          </ProfilePanel>
         )}
+          </div>
+        </div>
       </QueryStatus>
     </div>
   );

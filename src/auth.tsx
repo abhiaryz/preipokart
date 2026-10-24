@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { api, errorMessage } from './api';
-import { clearSession, hydrateTokensFromStorage, persistSession } from './api/client';
+import { clearSession, hydrateTokensFromStorage, persistSession, SESSION_STORAGE_KEY } from './api/client';
 import type { AuthSession, SessionUser } from './api/types';
 import posthog, { isPostHogConfigured } from './posthog';
 
@@ -75,6 +75,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void bootstrap();
     return () => {
       cancelled = true;
+    };
+  }, []);
+
+  // Multi-tab synchronization: keep authentication status in sync across all open tabs
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === SESSION_STORAGE_KEY) {
+        if (!e.newValue) {
+          // Session was removed in another tab (user logged out)
+          hydrateTokensFromStorage();
+          setApiUser(null);
+          if (isPostHogConfigured) posthog.reset();
+          identified.current = false;
+        } else {
+          // Session was created or updated in another tab
+          const stored = hydrateTokensFromStorage();
+          if (stored?.user) {
+            const next = toAuthUser(stored.user);
+            setApiUser(next);
+            identifyUser(next);
+            identified.current = true;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 

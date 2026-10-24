@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   Bank,
   Calculator,
   CaretDown,
+  Coins,
+  Receipt,
+  Scales,
   ChartLineUp,
   CheckCircle,
   LockKey,
@@ -13,8 +16,8 @@ import {
   ShieldCheck,
   Stamp,
   TrendUp,
+  CreditCard,
   UsersThree,
-  Vault,
 } from '@phosphor-icons/react';
 import { CompanyLogo } from '../components/ui';
 import HeroChartBackground from '../components/HeroChartBackground';
@@ -71,7 +74,7 @@ function PopIn({
 }
 
 const trustSignals = [
-  { icon: Vault, title: 'Escrow protected', body: 'Funds stay with us until both sides complete the deal.' },
+  { icon: CreditCard, title: 'Direct pay', body: 'Pay through Razorpay. Money goes straight to the other side of the deal.' },
   { icon: ShieldCheck, title: 'KYC before trading', body: 'Identity checks so every request comes from a verified account.' },
   { icon: ChartLineUp, title: 'Transparent book', body: 'See bids, asks, and recent activity before you place a request.' },
 ];
@@ -162,6 +165,24 @@ const calculators = [
     body: 'Estimate what an investment could be worth from the amount you put in, an annual return, and how long you hold it.',
     icon: Calculator,
   },
+  {
+    to: '/share-budget',
+    title: 'Shares for a budget',
+    body: 'Turn an amount and a price per share into whole shares, the consideration, and the cash left over.',
+    icon: Coins,
+  },
+  {
+    to: '/break-even',
+    title: 'Break-even exit price',
+    body: 'The sale price that covers the buy, brokerage, GST on brokerage, and stamp duty on an unlisted transfer.',
+    icon: Scales,
+  },
+  {
+    to: '/capital-gains',
+    title: 'Unlisted capital gains',
+    body: 'Tax on a gain from unlisted shares, using the 24-month holding rule, and what is left after tax.',
+    icon: Receipt,
+  },
 ];
 
 function SectionLabel({ children }: { children: ReactNode }) {
@@ -197,6 +218,28 @@ export default function Landing() {
   const { data: publicStats } = useApi(() => api.getPublicStats(), []);
   const { data: faqList } = useApi(() => api.listFaqs(), []);
   const listedCompanies = stockList?.data ?? [];
+  const stockCategories = useMemo(() => {
+    const totals = new Map<string, { count: number; change: number }>();
+    for (const company of listedCompanies) {
+      const name = company.sector?.trim() || 'Other';
+      const current = totals.get(name) ?? { count: 0, change: 0 };
+      current.count += 1;
+      current.change += company.change;
+      totals.set(name, current);
+    }
+    const names = stockList?.meta?.sectors?.length ? stockList.meta.sectors : [...totals.keys()];
+    return names
+      .map((name) => {
+        const group = totals.get(name) ?? { count: 0, change: 0 };
+        return {
+          name,
+          count: group.count,
+          change: group.count ? group.change / group.count : 0,
+        };
+      })
+      .filter((category) => category.count > 0)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [listedCompanies, stockList?.meta?.sectors]);
   const landingFaqs: FaqItem[] = (faqList?.data ?? []).slice(0, 3);
   const stats = [
     { value: `${publicStats?.companyCount ?? listedCompanies.length}+`, label: 'Private companies' },
@@ -206,7 +249,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-[100dvh] bg-canvas text-on-surface">
+    <div className="home-page min-h-[100dvh] bg-canvas text-on-surface">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-modal focus:rounded-lg focus:bg-[#0F4A3D] focus:px-3 focus:py-2 focus:text-white"
@@ -262,6 +305,100 @@ export default function Landing() {
             </div>
           </div>
         </section>
+
+        {/* Companies */}
+        <section id="companies" className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <SectionHeading
+              label="Universe"
+              title="Companies you can look up today"
+              description="Names from the in-app list. Availability and prices change. This is not an offer to buy or sell."
+            />
+            <Link to="/explore" className="btn-secondary shrink-0 min-h-11">
+              See the full list
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
+
+          <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {listedCompanies.map((company, index) => (
+              <li key={company.id} className="h-full">
+                <PopIn delay={(index % 4) * 70} className="h-full">
+                <Link
+                  to={`/stocks/${company.id}`}
+                  className="card group flex h-full flex-col gap-4 p-4 transition duration-200 hover:border-primary-container/35 hover:bg-surface-container-low/40"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <CompanyLogo name={company.name} domain={company.domain} size="sm" />
+                    <span className="rounded-md border border-outline-variant/40 bg-surface-container-low px-2 py-0.5 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
+                      {company.sector.split(' ')[0]}
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium group-hover:text-primary">{company.name}</p>
+                    <p className="mt-0.5 truncate text-xs text-on-surface-variant">{company.impliedVal} implied val.</p>
+                  </div>
+                  <div className="mt-auto flex items-end justify-between border-t border-outline-variant/30 pt-3">
+                    <span className="font-data-md text-data-md">
+                      ₹{company.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </span>
+                    <span className={`font-data-md text-sm ${company.change >= 0 ? 'text-bid' : 'text-ask'}`}>
+                      {company.change >= 0 ? '+' : ''}
+                      {company.change}%
+                    </span>
+                  </div>
+                </Link>
+                </PopIn>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {stockCategories.length > 0 ? (
+          <section id="categories" className="mx-auto max-w-[1400px] px-4 pb-20 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <SectionHeading
+                label="Categories"
+                title="Browse stocks by category"
+                description="Sectors from the companies above. Open a category to see the names in it."
+              />
+              <Link to="/explore" className="btn-secondary shrink-0 min-h-11">
+                See all companies
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
+
+            <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {stockCategories.map((category, index) => (
+                <li key={category.name} className="h-full">
+                  <PopIn delay={(index % 4) * 70} className="h-full">
+                    <Link
+                      to={`/explore?sector=${encodeURIComponent(category.name)}`}
+                      className="card group flex h-full flex-col gap-4 p-4 transition duration-200 hover:border-primary-container/35 hover:bg-surface-container-low/40"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
+                          Category
+                        </span>
+                        <span className="rounded-md border border-outline-variant/40 bg-surface-container-low px-2 py-0.5 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
+                          {category.count} {category.count === 1 ? 'company' : 'companies'}
+                        </span>
+                      </div>
+                      <p className="font-medium group-hover:text-primary">{category.name}</p>
+                      <div className="mt-auto flex items-end justify-between border-t border-outline-variant/30 pt-3">
+                        <span className="text-xs text-on-surface-variant">Average move</span>
+                        <span className={`font-data-md text-sm ${category.change >= 0 ? 'text-bid' : 'text-ask'}`}>
+                          {category.change >= 0 ? '+' : ''}
+                          {category.change.toFixed(1)}%
+                        </span>
+                      </div>
+                    </Link>
+                  </PopIn>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {/* Trust bar */}
         <section className="border-y border-outline-variant/40 bg-surface-container-low/50">
@@ -389,9 +526,9 @@ export default function Landing() {
           <SectionHeading
             label="Tools"
             title="Calculators"
-            description="Estimate transaction charges and a holding's return before you place a request."
+            description="See how many shares a budget buys, the price that covers charges, tax on a gain, and a holding's return."
           />
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {calculators.map((item, index) => {
               const Icon = item.icon;
               return (
@@ -415,54 +552,6 @@ export default function Landing() {
                 </li>
               );
             })}
-          </ul>
-        </section>
-
-        {/* Companies */}
-        <section id="companies" className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <SectionHeading
-              label="Universe"
-              title="Companies you can look up today"
-              description="Names from the in-app list. Availability and prices change. This is not an offer to buy or sell."
-            />
-            <Link to="/explore" className="btn-secondary shrink-0 min-h-11">
-              See the full list
-              <ArrowRight size={16} aria-hidden="true" />
-            </Link>
-          </div>
-
-          <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {listedCompanies.map((company, index) => (
-              <li key={company.id} className="h-full">
-                <PopIn delay={(index % 4) * 70} className="h-full">
-                <Link
-                  to={`/stocks/${company.id}`}
-                  className="card group flex h-full flex-col gap-4 p-4 transition duration-200 hover:border-primary-container/35 hover:bg-surface-container-low/40"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <CompanyLogo name={company.name} domain={company.domain} size="sm" />
-                    <span className="rounded-md border border-outline-variant/40 bg-surface-container-low px-2 py-0.5 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
-                      {company.sector.split(' ')[0]}
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate font-medium group-hover:text-primary">{company.name}</p>
-                    <p className="mt-0.5 truncate text-xs text-on-surface-variant">{company.impliedVal} implied val.</p>
-                  </div>
-                  <div className="mt-auto flex items-end justify-between border-t border-outline-variant/30 pt-3">
-                    <span className="font-data-md text-data-md">
-                      ₹{company.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                    </span>
-                    <span className={`font-data-md text-sm ${company.change >= 0 ? 'text-bid' : 'text-ask'}`}>
-                      {company.change >= 0 ? '+' : ''}
-                      {company.change}%
-                    </span>
-                  </div>
-                </Link>
-                </PopIn>
-              </li>
-            ))}
           </ul>
         </section>
 

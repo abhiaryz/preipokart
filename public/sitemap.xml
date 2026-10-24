@@ -43,6 +43,24 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://www.preipokart.com/share-budget</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.preipokart.com/break-even</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.preipokart.com/capital-gains</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://www.preipokart.com/faq</loc>
     <lastmod>2026-10-10</lastmod>
     <changefreq>monthly</changefreq>

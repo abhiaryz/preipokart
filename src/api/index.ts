@@ -18,6 +18,8 @@ import type {
   MarketsOverview,
   Nominee,
   Notification,
+  SupportTicketDetail,
+  SupportTicketSummary,
   Order,
   OrderBook,
   OrderSide,
@@ -214,6 +216,23 @@ export const api = {
     request<null>(`/v1/notifications/${encodeURIComponent(id)}/read`, { method: 'POST' }),
 
   markAllNotificationsRead: () => request<null>('/v1/notifications/read-all', { method: 'POST' }),
+
+  listSupportTickets: () =>
+    request<{ data: SupportTicketSummary[]; meta?: ListResult<SupportTicketSummary>['meta'] }>(
+      '/v1/support/tickets',
+    ).then(list),
+
+  createSupportTicket: (body: { subject: string; message: string }) =>
+    request<Envelope<{ ticketId: string }>>('/v1/support/tickets', { method: 'POST', body }).then(unwrap),
+
+  getSupportTicket: (id: string) =>
+    request<Envelope<SupportTicketDetail>>(`/v1/support/tickets/${encodeURIComponent(id)}`).then(unwrap),
+
+  replySupportTicket: (id: string, message: string) =>
+    request<Envelope<{ id: string; authorType: string; body: string; createdAt: string }>>(
+      `/v1/support/tickets/${encodeURIComponent(id)}/messages`,
+      { method: 'POST', body: { message } },
+    ).then(unwrap),
 
   listIpos: (status?: string) => {
     const suffix = status && status !== 'all' ? `?status=${encodeURIComponent(status)}` : '';

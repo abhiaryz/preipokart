@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlass, TrendDown, TrendUp } from '@phosphor-icons/react';
 import { CompanyLogo, PageHeader, QueryStatus } from '../components/ui';
 import { ExploreViewSwitch } from '../components/ExploreViewSwitch';
@@ -8,9 +8,23 @@ import { useApi } from '../hooks/useApi';
 
 export default function Explore() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sectorFromUrl = searchParams.get('sector') || 'All';
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSector, setSelectedSector] = useState('All');
+  const [selectedSector, setSelectedSector] = useState(sectorFromUrl);
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'change'>('change');
+
+  useEffect(() => {
+    setSelectedSector(sectorFromUrl);
+  }, [sectorFromUrl]);
+
+  function selectSector(sector: string) {
+    setSelectedSector(sector);
+    const next = new URLSearchParams(searchParams);
+    if (sector === 'All') next.delete('sector');
+    else next.set('sector', sector);
+    setSearchParams(next, { replace: true });
+  }
 
   const { data, error, loading } = useApi(
     () => api.listStocks({ q: searchQuery, sector: selectedSector, sort: sortBy }),
@@ -67,7 +81,7 @@ export default function Explore() {
           <button
             key={sec}
             type="button"
-            onClick={() => setSelectedSector(sec)}
+            onClick={() => selectSector(sec)}
             className={`min-h-9 whitespace-nowrap rounded-lg px-3 font-label-caps text-[11px] uppercase transition-colors ${
               selectedSector === sec
                 ? 'bg-[#0F4A3D] text-white'
@@ -89,7 +103,7 @@ export default function Explore() {
               className="btn-secondary mt-6"
               onClick={() => {
                 setSearchQuery('');
-                setSelectedSector('All');
+                selectSector('All');
               }}
             >
               Reset filters

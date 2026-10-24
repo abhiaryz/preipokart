@@ -1,294 +1,335 @@
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Bell,
-  BookOpenText,
-  Calculator,
-  Certificate,
-  ChartPieSlice,
-  ChartScatter,
-  ChatCircleDots,
-  ClipboardText,
-  Handshake,
-  House,
-  IdentificationCard,
-  Lifebuoy,
-  List,
-  PaperPlaneTilt,
-  RocketLaunch,
-  SignOut,
-  Stamp,
-  Storefront,
+  HouseSimple,
+  ChartBar,
+  Package,
   Vault,
+  RocketLaunch,
+  Newspaper,
+  Question,
+  EnvelopeSimple,
+  SidebarSimple,
+  SignOut,
   X,
-  type Icon,
 } from '@phosphor-icons/react';
-import { BrandLogo } from './ui';
-import { GlobalNavSearch } from './GlobalNavSearch';
 import { useAuth } from '../auth';
-import { raiseNavLinks } from '../pages/raise/raiseContent';
+import { GlobalNavSearch } from './GlobalNavSearch';
+import { HeaderAlertsDropdown } from './HeaderAlertsDropdown';
+import { ToolsDropdown } from './ToolsDropdown';
+import wordmark from '../assets/preipokart-wordmark.png';
 
-const raiseIconByPath: Record<string, Icon> = {
-  '/raise/pre-ipo-fundraising': Handshake,
-  '/raise/valuations': ChartPieSlice,
-  '/raise/sme-ipos': Certificate,
-  '/raise/sell-business': Storefront,
-};
+interface NavItem {
+  label: string;
+  path: string;
+  icon: ReactNode;
+  badge?: string;
+}
 
-const primaryNav = [
-  { to: '/dashboard', label: 'Home', icon: House },
-  { to: '/explore/screener', label: 'Screener', icon: ChartScatter },
-  { to: '/portfolio', label: 'Portfolio', icon: Vault },
-  { to: '/orders', label: 'Orders', icon: ClipboardText },
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    label: 'Trading & Markets',
+    items: [
+      { label: 'Dashboard', path: '/dashboard', icon: <HouseSimple size={16} /> },
+      { label: 'Market Screener', path: '/explore/screener', icon: <ChartBar size={16} /> },
+      { label: 'Orders Desk', path: '/orders', icon: <Package size={16} /> },
+      { label: 'Portfolio', path: '/portfolio', icon: <Vault size={16} /> },
+    ],
+  },
+  {
+    label: 'Primary Markets',
+    items: [
+      { label: 'IPO Calendar', path: '/ipos', icon: <RocketLaunch size={16} /> },
+    ],
+  },
+  {
+    label: 'Account & Support',
+    items: [{ label: 'Support', path: '/support', icon: <EnvelopeSimple size={16} /> }],
+  },
 ];
 
-const raiseNav = raiseNavLinks.map((link) => ({
-  to: link.to,
-  label: link.label,
-  icon: raiseIconByPath[link.to] ?? Handshake,
-}));
-
-const accountNav = [
-  { to: '/profile', label: 'Profile', icon: IdentificationCard },
-  { to: '/notifications', label: 'Alerts', icon: Bell },
-  { to: '/ipos', label: 'IPOs', icon: RocketLaunch },
-  { to: '/blog', label: 'Blog / News', icon: BookOpenText },
-  { to: '/roi-calculator', label: 'ROI calculator', icon: Calculator },
-  { to: '/stamp-duty', label: 'Stamp duty', icon: Stamp },
-  { to: '/faq', label: 'FAQ', icon: ChatCircleDots },
-  { to: '/contact', label: 'Contact us', icon: PaperPlaneTilt },
-  { to: '/help', label: 'Help', icon: Lifebuoy },
-];
-
-function Logo({ compact = false }: { compact?: boolean }) {
-  return (
-    <Link
-      to="/dashboard"
-      className={`flex min-w-0 items-center ${compact ? '' : 'flex-col items-start gap-1'}`}
-      aria-label="Preipokart home"
-    >
-      <BrandLogo className={compact ? 'h-6' : 'h-7'} />
-      {compact ? null : (
-        <span className="text-[11px] font-medium tracking-wide text-on-surface-variant">
-          Pre-IPO marketplace
-        </span>
-      )}
-    </Link>
-  );
+function isMobileNav() {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
 }
 
 function isNavActive(to: string, pathname: string) {
   if (to === '/orders' && pathname.startsWith('/place-order')) return true;
-  if (
-    to === '/explore/screener' &&
-    (pathname.startsWith('/explore') || pathname.startsWith('/stocks'))
-  ) {
-    return true;
-  }
-  if (to === '/blog' && pathname.startsWith('/blog')) return true;
-  if (to === '/faq' && pathname.startsWith('/faq')) return true;
+  if (to === '/explore/screener' && (pathname.startsWith('/explore') || pathname.startsWith('/stocks/'))) return true;
   if (to === '/dashboard') return pathname === '/dashboard' || pathname === '/';
   return pathname === to || pathname.startsWith(`${to}/`);
 }
 
-function NavList({
-  items,
-  onNavigate,
-}: {
-  items: typeof primaryNav;
-  onNavigate: () => void;
-}) {
-  const location = useLocation();
-  return (
-    <div className="flex flex-col gap-1">
-      {items.map(({ to, label, icon: Icon }) => {
-        const active = isNavActive(to, location.pathname);
-        return (
-          <NavLink
-            key={to}
-            to={to}
-            onClick={onNavigate}
-            className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 ${
-              active
-                ? 'nav-active'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-            }`}
-          >
-            <Icon size={18} weight="duotone" className="shrink-0 text-primary" aria-hidden="true" />
-            {label}
-          </NavLink>
-        );
-      })}
-    </div>
-  );
-}
-
 export default function AppShell() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { user, logout } = useAuth();
-  const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const openBtnRef = useRef<HTMLButtonElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const focusTarget = useRef<'open' | 'close' | null>(null);
+
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (isMobileNav()) return false;
+    return localStorage.getItem('app_sidebar_open') !== '0';
+  });
+
+  function setSidebar(next: boolean, moveFocus = false) {
+    if (moveFocus) focusTarget.current = next ? 'close' : 'open';
+    setSidebarOpen(next);
+    if (!isMobileNav()) {
+      localStorage.setItem('app_sidebar_open', next ? '1' : '0');
+    }
+  }
 
   useEffect(() => {
-    close();
+    if (focusTarget.current === 'close') closeBtnRef.current?.focus();
+    if (focusTarget.current === 'open') openBtnRef.current?.focus();
+    focusTarget.current = null;
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    function onChange() {
+      setSidebarOpen(mq.matches ? false : localStorage.getItem('app_sidebar_open') !== '0');
+    }
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    if (isMobileNav()) setSidebarOpen(false);
   }, [location.pathname]);
 
+  // Escape key closes drawer on mobile
   useEffect(() => {
-    if (!open) return undefined;
+    if (!sidebarOpen || !isMobileNav()) return undefined;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') close();
+      if (event.key === 'Escape') setSidebar(false, true);
     };
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, [sidebarOpen]);
 
-  const menu = (
-    <>
-      <p className="mb-2 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
-        Browse
-      </p>
-      <NavList items={primaryNav} onNavigate={close} />
-      <p className="mb-2 mt-5 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
-        Raise
-      </p>
-      <NavList items={raiseNav} onNavigate={close} />
-      <p className="mb-2 mt-5 px-3 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant">
-        Account
-      </p>
-      <NavList items={accountNav} onNavigate={close} />
-    </>
-  );
+  // Page title from nav item
+  const allItems = NAV_SECTIONS.flatMap((s) => s.items);
+  const currentItem =
+    allItems.find((i) => isNavActive(i.path, location.pathname)) ||
+    (location.pathname.startsWith('/stocks/') ? { label: 'Company Overview' } : undefined) ||
+    (location.pathname.startsWith('/orders/') ? { label: 'Order Execution' } : undefined) ||
+    (location.pathname.startsWith('/profile') ? { label: 'Profile & KYC' } : undefined) ||
+    (location.pathname.startsWith('/faq') ? { label: 'FAQs & Helpdesk' } : undefined) ||
+    (location.pathname.startsWith('/support') ? { label: 'Support desk' } : undefined);
+  const pageTitle = currentItem?.label ?? 'PreIPOkart';
+  const faqActive = location.pathname.startsWith('/faq');
 
   return (
-    <div className="min-h-[100dvh] bg-canvas text-on-surface">
-      {/* Mobile top bar */}
-      <header className="fixed inset-x-0 top-0 z-nav border-b border-outline-variant/40 bg-surface/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl md:hidden">
-        <div className="flex h-14 items-center gap-2 px-3">
-          <Logo compact />
-          <GlobalNavSearch className="min-w-0 flex-1" compact />
-          <Link
-            to="/notifications"
-            className="btn-ghost min-h-10 min-w-10 shrink-0"
-            aria-label="Alerts"
-          >
-            <Bell size={20} weight="duotone" aria-hidden="true" />
+    <div className={`app-layout${sidebarOpen ? ' sidebar-open' : ' sidebar-closed'}`}>
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          aria-label="Close sidebar"
+          onClick={() => setSidebar(false, true)}
+        />
+      )}
+
+      {/* Sidenavbar */}
+      <aside
+        id="app-sidebar"
+        className={`sidebar${sidebarOpen ? ' open' : ' closed'}`}
+        aria-hidden={!sidebarOpen}
+      >
+        <div className="sidebar-logo">
+          <Link to="/dashboard" aria-label="Preipokart home" className="flex items-center">
+            <img src={wordmark} alt="Preipokart" className="brand-logo" />
           </Link>
           <button
+            ref={closeBtnRef}
             type="button"
-            className="btn-ghost min-h-10 min-w-10 shrink-0"
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            aria-label={open ? 'Close menu' : 'Open menu'}
-            onClick={() => setOpen((v) => !v)}
+            className="header-icon-btn !h-7 !w-7"
+            aria-label="Close sidebar"
+            onClick={() => setSidebar(false, true)}
           >
-            {open ? <X size={22} aria-hidden="true" /> : <List size={22} aria-hidden="true" />}
+            <X size={15} />
           </button>
         </div>
-      </header>
 
-      {/* Mobile drawer + backdrop */}
-      {open ? (
-        <div className="fixed inset-0 z-overlay md:hidden" id="mobile-nav-root">
-          <button
-            type="button"
-            className="absolute inset-0 bg-on-surface/40 backdrop-blur-[2px]"
-            aria-label="Close menu"
-            onClick={close}
-          />
+        <nav className="sidebar-nav" aria-label="Platform navigation">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.label}>
+              <div className="nav-section-label">{section.label}</div>
+              {section.items.map((item) => {
+                const isActive = isNavActive(item.path, location.pathname);
+                return (
+                  <button
+                    key={item.path}
+                    type="button"
+                    className={`nav-item ${isActive ? 'active' : ''}`}
+                    onClick={() => {
+                      navigate(item.path);
+                      if (isMobileNav()) setSidebar(false, true);
+                    }}
+                    id={`nav-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <span className="nav-item-icon">{item.icon}</span>
+                    <span className="truncate">{item.label}</span>
+                    {item.badge && <span className="nav-badge">{item.badge}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
           <div
-            id="mobile-nav"
-            className="absolute inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] flex max-h-[min(78dvh,36rem)] flex-col overflow-hidden rounded-b-2xl border-b border-outline-variant/40 bg-card shadow-lg"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Navigation"
+            className="sidebar-user"
+            onClick={() => {
+              navigate('/profile');
+              if (isMobileNav()) setSidebar(false, true);
+            }}
           >
-            <div className="border-b border-outline-variant/30 px-4 py-3">
-              <p className="truncate text-sm font-medium text-on-surface">{user?.name ?? 'Account'}</p>
-              <p className="truncate text-xs text-on-surface-variant">{user?.email}</p>
+            <div className="avatar">
+              {((user?.name || user?.email || 'U').charAt(0)).toUpperCase()}
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain p-4 pb-6">{menu}</div>
-            <div className="border-t border-outline-variant/30 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-              <button
-                type="button"
-                className="btn-ghost min-h-11 w-full justify-start text-error"
-                onClick={() => {
-                  logout();
-                  close();
-                  navigate('/');
-                }}
-              >
-                <SignOut size={18} aria-hidden="true" />
-                Log out
-              </button>
+            <div className="sidebar-user-info">
+              <div className="sidebar-user-name">{user?.name || 'Investor Account'}</div>
+              <div className="sidebar-user-role">{user?.email || 'Verified Account'}</div>
             </div>
+            <button
+              type="button"
+              className="header-icon-btn !h-7 !w-7 !border-0 hover:!bg-black/5"
+              title="Sign out"
+              onClick={(e) => {
+                e.stopPropagation();
+                logout();
+                navigate('/');
+              }}
+            >
+              <SignOut size={15} />
+            </button>
           </div>
         </div>
-      ) : null}
+      </aside>
 
-      {/* Mobile bottom tabs */}
+      {/* Main content */}
+      <main className="main">
+        {/* Top header bar */}
+        <header className="header">
+          <button
+            ref={openBtnRef}
+            type="button"
+            className="header-icon-btn"
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-expanded={sidebarOpen}
+            aria-controls="app-sidebar"
+            onClick={() => setSidebar(!sidebarOpen, true)}
+            title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            <SidebarSimple size={18} />
+          </button>
+
+          <h1 className="header-title">{pageTitle}</h1>
+
+          <div className="header-actions">
+            <GlobalNavSearch compact className="hidden sm:block" />
+
+            {/* Tools / Calculators Dropdown */}
+            <ToolsDropdown variant="icon" />
+
+            {/* Market News / Blog Shortcut */}
+            <button
+              type="button"
+              className="header-icon-btn"
+              aria-label="Market News & Insights"
+              onClick={() => navigate('/blog')}
+              title="Market News & Insights"
+            >
+              <Newspaper size={17} />
+            </button>
+
+            <HeaderAlertsDropdown />
+
+            <button
+              type="button"
+              className={`header-icon-btn${faqActive ? ' !border-[#0f4a3d] !text-[#0f4a3d] !bg-emerald-50' : ''}`}
+              aria-label="FAQs and helpdesk"
+              aria-current={faqActive ? 'page' : undefined}
+              onClick={() => navigate('/faq')}
+              title="FAQs & Helpdesk"
+            >
+              <Question size={17} />
+            </button>
+
+            {/* Profile & KYC */}
+            <button
+              type="button"
+              className={`avatar !h-8 !w-8 cursor-pointer text-xs${
+                location.pathname.startsWith('/profile') ? ' ring-2 ring-[#0f4a3d] ring-offset-1' : ''
+              }`}
+              aria-label="Profile and KYC"
+              aria-current={location.pathname.startsWith('/profile') ? 'page' : undefined}
+              onClick={() => navigate('/profile')}
+              title="Profile & KYC"
+            >
+              {((user?.name || user?.email || 'U').charAt(0)).toUpperCase()}
+            </button>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <div className="page-content">
+          <Outlet />
+        </div>
+      </main>
+
+      {/* Mobile bottom quick navigation tabs */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-nav border-t border-outline-variant/40 bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
-        aria-label="Primary"
+        className="fixed inset-x-0 bottom-0 z-nav border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
+        aria-label="Mobile quick tabs"
       >
         <ul className="grid h-16 grid-cols-4">
-          {primaryNav.map(({ to, label, icon: Icon }) => {
+          {[
+            { to: '/dashboard', label: 'Home', icon: HouseSimple },
+            { to: '/explore/screener', label: 'Screener', icon: ChartBar },
+            { to: '/orders', label: 'Orders', icon: Package },
+            { to: '/portfolio', label: 'Portfolio', icon: Vault },
+          ].map(({ to, label, icon: Icon }) => {
             const active = isNavActive(to, location.pathname);
             return (
               <li key={to} className="min-w-0">
-                <NavLink
-                  to={to}
-                  className={`flex h-full flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium transition-colors ${
-                    active ? 'text-primary' : 'text-on-surface-variant'
+                <button
+                  type="button"
+                  onClick={() => navigate(to)}
+                  className={`flex h-full w-full flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium transition-colors ${
+                    active ? 'text-[#0f4a3d]' : 'text-slate-500'
                   }`}
                 >
                   <span
                     className={`flex h-8 w-12 items-center justify-center rounded-full transition-colors ${
-                      active ? 'bg-primary/10' : ''
+                      active ? 'bg-[#0f4a3d]/10' : ''
                     }`}
                   >
-                    <Icon size={22} weight={active ? 'fill' : 'duotone'} aria-hidden="true" />
+                    <Icon size={20} weight={active ? 'bold' : 'regular'} />
                   </span>
                   <span className="truncate">{label}</span>
-                </NavLink>
+                </button>
               </li>
             );
           })}
         </ul>
       </nav>
-
-      {/* Desktop sidebar */}
-      <aside className="fixed left-0 top-0 z-nav hidden h-full w-64 flex-col border-r border-outline-variant/40 bg-surface-container-lowest px-4 py-5 md:flex">
-        <Logo />
-        <GlobalNavSearch className="mt-5" />
-        <div className="mt-6 flex-1 overflow-y-auto">{menu}</div>
-        <div className="border-t border-on-surface/10 pt-4">
-          <p className="px-3 text-sm font-medium text-on-surface">{user?.name ?? 'Account'}</p>
-          <p className="px-3 text-xs text-on-surface-variant">{user?.email}</p>
-          <button
-            type="button"
-            className="btn-ghost mt-2 w-full justify-start"
-            onClick={() => {
-              logout();
-              navigate('/');
-            }}
-          >
-            <SignOut size={18} aria-hidden="true" />
-            Log out
-          </button>
-        </div>
-      </aside>
-
-      <main className="min-h-[100dvh] pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:ml-64 md:pb-0 md:pt-0">
-        <div className="mx-auto w-full max-w-[1440px] px-4 py-5 sm:px-5 md:px-8 md:py-8">
-          <Outlet />
-        </div>
-      </main>
     </div>
   );
 }

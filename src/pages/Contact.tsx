@@ -172,7 +172,7 @@ export default function Contact() {
                       className="mt-3 inline-flex text-sm text-primary underline-offset-4 hover:underline"
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(office.mapsQuery)}`}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                     >
                       Open in Google Maps
                     </a>

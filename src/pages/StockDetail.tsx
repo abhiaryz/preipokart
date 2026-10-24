@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, FileText, TrendDown, TrendUp } from '@phosphor-icons/react';
+import { ArrowLeft, FileText, TrendDown, TrendUp, ChartPieSlice } from '@phosphor-icons/react';
 import { CompanyLogo, QueryStatus } from '../components/ui';
 import { api } from '../api';
 import type { ChartRange, StockDetail as StockDetailType } from '../api/types';
@@ -172,10 +172,15 @@ export default function StockDetail() {
   const { user } = useAuth();
   const { data: stock, error, loading } = useApi(() => api.getStock(id!), [id], Boolean(id));
   const [yearIndex, setYearIndex] = useState(0);
+  const [shYearIndex, setShYearIndex] = useState(0);
+  const [statementTab, setStatementTab] = useState<'income' | 'balance_sheet' | 'cash_flow'>('income');
 
   const years = stock?.financials ?? [];
   const selected = years[yearIndex] ?? years[0];
   const maxAbsRevenue = useMemo(() => Math.max(...years.map((y) => Math.abs(y.revenueCr)), 1), [years]);
+
+  const shareholdings = stock?.shareholdings ?? [];
+  const selectedSh = shareholdings[shYearIndex] ?? shareholdings[0];
 
   if (!id || (!loading && (error || !stock))) {
     return <Navigate to="/explore" replace />;
@@ -263,7 +268,7 @@ export default function StockDetail() {
                     <dt className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">{label}</dt>
                     <dd className="mt-1 break-all text-sm font-medium text-on-surface">
                       {label === 'Website' ? (
-                        <a className="text-primary underline-offset-2 hover:underline" href={value} target="_blank" rel="noreferrer">
+                        <a className="text-primary underline-offset-2 hover:underline" href={value} target="_blank" rel="noopener noreferrer">
                           {value.replace(/^https?:\/\//, '')}
                         </a>
                       ) : (
@@ -276,98 +281,461 @@ export default function StockDetail() {
             </dl>
           </section>
 
+          {/* Fundamentals & Key Ratios */}
+          <section className="elevation-widget rounded-xl p-6">
+            <div className="flex flex-col gap-1 border-b border-outline-variant/30 pb-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="font-headline-sm text-xl text-on-surface">Fundamentals & Key Ratios</h2>
+                <p className="mt-1 text-sm text-on-surface-variant">
+                  Official corporate identifiers, valuation multiples, capital efficiency, and trading bounds.
+                </p>
+              </div>
+              <span className="self-start rounded-md border border-outline-variant/50 bg-surface-container px-2.5 py-1 font-mono text-xs text-on-surface-variant sm:self-auto">
+                {stock.ticker}
+              </span>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
+              {[
+                { label: 'ISIN', value: stock.isin || '—', isMono: true, hint: 'Security Code' },
+                { label: 'PAN Card', value: stock.pan || '—', isMono: true, hint: 'Entity Tax ID' },
+                { label: 'Face Value', value: stock.faceValue != null ? `₹${stock.faceValue}` : '—', isMono: true, hint: 'Nominal share value' },
+                { label: 'Book Value', value: stock.bookValue != null ? `₹${stock.bookValue}` : '—', isMono: true, hint: 'NAV per share' },
+                { label: 'ROE', value: stock.roe != null ? `${stock.roe}%` : '—', isMono: true, hint: 'Return on Equity' },
+                { label: 'Debt / Equity', value: stock.debtToEquity != null ? stock.debtToEquity.toString() : '—', isMono: true, hint: 'Leverage ratio' },
+                { label: '52-Wk High', value: stock.week52High != null ? `₹${stock.week52High.toLocaleString('en-IN')}` : '—', isMono: true, hint: '1-Year High' },
+                { label: '52-Wk Low', value: stock.week52Low != null ? `₹${stock.week52Low.toLocaleString('en-IN')}` : '—', isMono: true, hint: '1-Year Low' },
+                { label: 'P/E Ratio', value: stock.peRatio != null ? stock.peRatio.toString() : '—', isMono: true, hint: 'Price / Earnings' },
+                { label: 'P/B Ratio', value: stock.pbRatio != null ? stock.pbRatio.toString() : '—', isMono: true, hint: 'Price / Book' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3.5 transition-colors hover:border-outline-variant/70">
+                  <span className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">{item.label}</span>
+                  <p className={`mt-1.5 text-base font-semibold text-on-surface ${item.isMono ? 'font-mono' : ''}`}>
+                    {item.value}
+                  </p>
+                  <span className="text-[11px] text-on-surface-variant/80">{item.hint}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {years.length ? (
             <section className="elevation-widget rounded-xl p-6">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-col gap-4 border-b border-outline-variant/30 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="font-headline-sm text-xl text-on-surface">Financials by year</h2>
-                  <p className="mt-1 text-sm text-on-surface-variant">Figures in ₹ crore.</p>
+                  <h2 className="font-headline-sm text-xl text-on-surface">Key Financials (YoY)</h2>
+                  <p className="mt-1 text-sm text-on-surface-variant">Figures in ₹ crore unless specified.</p>
                 </div>
-                <div className="flex flex-wrap gap-1" role="tablist" aria-label="Financial year">
-                  {years.map((y, i) => (
+
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Statement Tab Switcher */}
+                  <div className="inline-flex rounded-lg border border-outline-variant/40 bg-surface-container-low p-1" role="tablist">
                     <button
-                      key={y.year}
                       type="button"
                       role="tab"
-                      aria-selected={yearIndex === i}
-                      onClick={() => setYearIndex(i)}
-                      className={`min-h-9 rounded-lg px-3 font-label-caps text-[11px] uppercase ${
-                        yearIndex === i
-                          ? 'bg-[#0F4A3D] text-white'
-                          : 'text-on-surface-variant hover:bg-on-surface/5'
+                      aria-selected={statementTab === 'income'}
+                      onClick={() => setStatementTab('income')}
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                        statementTab === 'income' ? 'bg-[#0F4A3D] text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
                       }`}
                     >
-                      {y.year}
+                      Income
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={statementTab === 'balance_sheet'}
+                      onClick={() => setStatementTab('balance_sheet')}
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                        statementTab === 'balance_sheet' ? 'bg-[#0F4A3D] text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+                      }`}
+                    >
+                      Balance Sheet
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={statementTab === 'cash_flow'}
+                      onClick={() => setStatementTab('cash_flow')}
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                        statementTab === 'cash_flow' ? 'bg-[#0F4A3D] text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+                      }`}
+                    >
+                      Cash Flow
+                    </button>
+                  </div>
+
+                  {/* Year Switcher */}
+                  <div className="flex flex-wrap gap-1" role="tablist" aria-label="Financial year">
+                    {years.map((y, i) => (
+                      <button
+                        key={y.year}
+                        type="button"
+                        role="tab"
+                        aria-selected={yearIndex === i}
+                        onClick={() => setYearIndex(i)}
+                        className={`min-h-8 rounded-lg px-2.5 font-label-caps text-[11px] uppercase ${
+                          yearIndex === i
+                            ? 'bg-secondary-container/20 font-semibold text-secondary-container border border-secondary-container/30'
+                            : 'text-on-surface-variant hover:bg-on-surface/5'
+                        }`}
+                      >
+                        {y.year}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
+              {/* Selected Year Highlights */}
               {selected ? (
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {[
-                    ['Revenue', formatCr(selected.revenueCr)],
-                    ['EBITDA', formatCr(selected.ebitdaCr)],
-                    ['PAT', formatCr(selected.patCr)],
-                    ['Employees', selected.employees.toLocaleString('en-IN')],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-4">
-                      <p className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">{label}</p>
-                      <p className="mt-2 font-data-md text-data-md text-on-surface">{value}</p>
+                <div className="mt-5">
+                  {statementTab === 'income' && (
+                    <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-6">
+                      {[
+                        ['Revenue', formatCr(selected.revenueCr)],
+                        ['EBITDA', formatCr(selected.ebitdaCr)],
+                        ['PBT', selected.pbtCr != null ? formatCr(selected.pbtCr) : '—'],
+                        ['PAT', formatCr(selected.patCr)],
+                        ['EPS', selected.eps != null ? `₹${selected.eps}` : '—'],
+                        ['OPM (%)', selected.opmPct != null ? `${selected.opmPct}%` : '—'],
+                      ].map(([label, value]) => (
+                        <div key={label} className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3.5">
+                          <p className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">{label}</p>
+                          <p className="mt-1.5 font-data-md text-base font-semibold text-on-surface">{value}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+
+                  {statementTab === 'balance_sheet' && (
+                    <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-6">
+                      {[
+                        ['Total Assets', selected.totalAssetsCr != null ? formatCr(selected.totalAssetsCr) : '—'],
+                        ['Share Capital', selected.shareCapitalCr != null ? formatCr(selected.shareCapitalCr) : '—'],
+                        ['Reserves', selected.reservesCr != null ? formatCr(selected.reservesCr) : '—'],
+                        ['Borrowings', selected.borrowingsCr != null ? formatCr(selected.borrowingsCr) : '—'],
+                        ['Total Liabilities', selected.totalLiabilitiesCr != null ? formatCr(selected.totalLiabilitiesCr) : '—'],
+                        ['Investments', selected.investmentsCr != null ? formatCr(selected.investmentsCr) : '—'],
+                      ].map(([label, value]) => (
+                        <div key={label} className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3.5">
+                          <p className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">{label}</p>
+                          <p className="mt-1.5 font-data-md text-base font-semibold text-on-surface">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {statementTab === 'cash_flow' && (
+                    <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
+                      {[
+                        ['CFO (Operating)', selected.cfoCr != null ? formatCr(selected.cfoCr) : '—'],
+                        ['CF Investing', selected.cfInvestingCr != null ? formatCr(selected.cfInvestingCr) : '—'],
+                        ['CF Financing', selected.cfFinancingCr != null ? formatCr(selected.cfFinancingCr) : '—'],
+                        ['Net Cash Flow', selected.netCashCr != null ? formatCr(selected.netCashCr) : '—'],
+                        ['Cash at End', selected.cashAtEndCr != null ? formatCr(selected.cashAtEndCr) : '—'],
+                      ].map(([label, value]) => (
+                        <div key={label} className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3.5">
+                          <p className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">{label}</p>
+                          <p className="mt-1.5 font-data-md text-base font-semibold text-on-surface">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : null}
 
+              {/* Multi-Year Table */}
               <div className="mt-6 overflow-x-auto">
-                <table className="w-full min-w-[32rem] text-left text-sm">
-                  <caption className="sr-only">Year-wise financials</caption>
-                  <thead>
-                    <tr className="border-b border-outline-variant/40">
-                      {['Year', 'Revenue', 'EBITDA', 'PAT', 'Employees'].map((h) => (
-                        <th key={h} className="px-3 py-2 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {years.map((row, i) => (
-                      <tr
-                        key={row.year}
-                        className={`border-b border-outline-variant/30 ${i === yearIndex ? 'bg-primary-container/10' : ''}`}
-                      >
-                        <td className="px-3 py-3 font-medium">{row.year}</td>
-                        <td className="px-3 py-3 font-mono">{formatCr(row.revenueCr)}</td>
-                        <td className={`px-3 py-3 font-mono ${row.ebitdaCr < 0 ? 'text-error' : 'text-bid'}`}>
-                          {formatCr(row.ebitdaCr)}
-                        </td>
-                        <td className={`px-3 py-3 font-mono ${row.patCr < 0 ? 'text-error' : 'text-bid'}`}>
-                          {formatCr(row.patCr)}
-                        </td>
-                        <td className="px-3 py-3 font-mono">{row.employees.toLocaleString('en-IN')}</td>
+                {statementTab === 'income' && (
+                  <table className="w-full min-w-[36rem] text-left text-sm">
+                    <caption className="sr-only">Year-wise income statement</caption>
+                    <thead>
+                      <tr className="border-b border-outline-variant/40">
+                        {['Year', 'Revenue', 'EBITDA', 'PBT', 'PAT', 'EPS (₹)', 'OPM (%)', 'Employees'].map((h) => (
+                          <th key={h} className="px-3 py-2 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
+                            {h}
+                          </th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {years.map((row, i) => (
+                        <tr
+                          key={row.year}
+                          className={`border-b border-outline-variant/30 ${i === yearIndex ? 'bg-primary-container/10' : ''}`}
+                        >
+                          <td className="px-3 py-3 font-medium">{row.year}</td>
+                          <td className="px-3 py-3 font-mono">{formatCr(row.revenueCr)}</td>
+                          <td className={`px-3 py-3 font-mono ${row.ebitdaCr < 0 ? 'text-error' : 'text-bid'}`}>
+                            {formatCr(row.ebitdaCr)}
+                          </td>
+                          <td className={`px-3 py-3 font-mono ${(row.pbtCr ?? 0) < 0 ? 'text-error' : 'text-bid'}`}>
+                            {row.pbtCr != null ? formatCr(row.pbtCr) : '—'}
+                          </td>
+                          <td className={`px-3 py-3 font-mono ${row.patCr < 0 ? 'text-error' : 'text-bid'}`}>
+                            {formatCr(row.patCr)}
+                          </td>
+                          <td className="px-3 py-3 font-mono">{row.eps != null ? `₹${row.eps}` : '—'}</td>
+                          <td className="px-3 py-3 font-mono">{row.opmPct != null ? `${row.opmPct}%` : '—'}</td>
+                          <td className="px-3 py-3 font-mono">{row.employees ? row.employees.toLocaleString('en-IN') : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+
+                {statementTab === 'balance_sheet' && (
+                  <table className="w-full min-w-[36rem] text-left text-sm">
+                    <caption className="sr-only">Year-wise balance sheet</caption>
+                    <thead>
+                      <tr className="border-b border-outline-variant/40">
+                        {['Year', 'Share Capital', 'Reserves', 'Borrowings', 'Total Assets', 'Total Liabilities', 'Investments'].map((h) => (
+                          <th key={h} className="px-3 py-2 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {years.map((row, i) => (
+                        <tr
+                          key={row.year}
+                          className={`border-b border-outline-variant/30 ${i === yearIndex ? 'bg-primary-container/10' : ''}`}
+                        >
+                          <td className="px-3 py-3 font-medium">{row.year}</td>
+                          <td className="px-3 py-3 font-mono">{row.shareCapitalCr != null ? formatCr(row.shareCapitalCr) : '—'}</td>
+                          <td className="px-3 py-3 font-mono">{row.reservesCr != null ? formatCr(row.reservesCr) : '—'}</td>
+                          <td className="px-3 py-3 font-mono">{row.borrowingsCr != null ? formatCr(row.borrowingsCr) : '—'}</td>
+                          <td className="px-3 py-3 font-mono font-semibold">{row.totalAssetsCr != null ? formatCr(row.totalAssetsCr) : '—'}</td>
+                          <td className="px-3 py-3 font-mono">{row.totalLiabilitiesCr != null ? formatCr(row.totalLiabilitiesCr) : '—'}</td>
+                          <td className="px-3 py-3 font-mono">{row.investmentsCr != null ? formatCr(row.investmentsCr) : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+
+                {statementTab === 'cash_flow' && (
+                  <table className="w-full min-w-[36rem] text-left text-sm">
+                    <caption className="sr-only">Year-wise cash flow</caption>
+                    <thead>
+                      <tr className="border-b border-outline-variant/40">
+                        {['Year', 'CFO (Operating)', 'CF Investing', 'CF Financing', 'Net Cash Flow', 'Cash at End'].map((h) => (
+                          <th key={h} className="px-3 py-2 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {years.map((row, i) => (
+                        <tr
+                          key={row.year}
+                          className={`border-b border-outline-variant/30 ${i === yearIndex ? 'bg-primary-container/10' : ''}`}
+                        >
+                          <td className="px-3 py-3 font-medium">{row.year}</td>
+                          <td className={`px-3 py-3 font-mono ${(row.cfoCr ?? 0) < 0 ? 'text-error' : 'text-bid'}`}>
+                            {row.cfoCr != null ? formatCr(row.cfoCr) : '—'}
+                          </td>
+                          <td className="px-3 py-3 font-mono">{row.cfInvestingCr != null ? formatCr(row.cfInvestingCr) : '—'}</td>
+                          <td className="px-3 py-3 font-mono">{row.cfFinancingCr != null ? formatCr(row.cfFinancingCr) : '—'}</td>
+                          <td className={`px-3 py-3 font-mono ${(row.netCashCr ?? 0) < 0 ? 'text-error' : 'text-bid'}`}>
+                            {row.netCashCr != null ? formatCr(row.netCashCr) : '—'}
+                          </td>
+                          <td className="px-3 py-3 font-mono font-semibold">{row.cashAtEndCr != null ? formatCr(row.cashAtEndCr) : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
 
-              <div className="mt-6 space-y-3" aria-hidden="true">
-                <p className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">Revenue trend</p>
-                {years.map((row) => (
-                  <div key={row.year} className="flex items-center gap-3">
-                    <span className="w-12 shrink-0 font-mono text-xs text-on-surface-variant">{row.year}</span>
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-container">
-                      <div
-                        className="h-full rounded-full bg-primary-container"
-                        style={{ width: `${Math.max(6, (Math.abs(row.revenueCr) / maxAbsRevenue) * 100)}%` }}
-                      />
+              {/* Visual trend bar for Income Statement */}
+              {statementTab === 'income' && (
+                <div className="mt-6 space-y-3" aria-hidden="true">
+                  <p className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">Revenue trend</p>
+                  {years.map((row) => (
+                    <div key={row.year} className="flex items-center gap-3">
+                      <span className="w-12 shrink-0 font-mono text-xs text-on-surface-variant">{row.year}</span>
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-container">
+                        <div
+                          className="h-full rounded-full bg-primary-container"
+                          style={{ width: `${Math.max(6, (Math.abs(row.revenueCr) / maxAbsRevenue) * 100)}%` }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </section>
           ) : null}
+
+          <section className="elevation-widget rounded-xl p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ChartPieSlice size={20} className="text-[#0F4A3D]" aria-hidden="true" />
+                  <h2 className="font-headline-sm text-xl text-on-surface">Shareholding pattern</h2>
+                </div>
+                <p className="mt-1 text-sm text-on-surface-variant">Equity ownership and cap-table breakdown by year.</p>
+              </div>
+              {shareholdings.length > 0 ? (
+                <div className="flex flex-wrap gap-1" role="tablist" aria-label="Shareholding year">
+                  {shareholdings.map((sh, i) => (
+                    <button
+                      key={sh.year}
+                      type="button"
+                      role="tab"
+                      aria-selected={shYearIndex === i}
+                      onClick={() => setShYearIndex(i)}
+                      className={`min-h-9 rounded-lg px-3 font-label-caps text-[11px] uppercase transition-colors ${
+                        shYearIndex === i
+                          ? 'bg-[#0F4A3D] text-white shadow-sm'
+                          : 'text-on-surface-variant hover:bg-on-surface/5'
+                      }`}
+                    >
+                      {sh.year}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {shareholdings.length === 0 ? (
+              <div className="mt-6 rounded-lg border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-6 text-center">
+                <ChartPieSlice size={32} className="mx-auto text-on-surface-variant/50" />
+                <p className="mt-2 text-sm font-medium text-on-surface">No Shareholding Pattern Filed Yet</p>
+                <p className="mt-1 text-xs text-on-surface-variant">
+                  Cap-table filings and ownership allocations for {stock.name} will appear here once published by company governance.
+                </p>
+              </div>
+            ) : selectedSh ? (
+              <div className="mt-6 space-y-6">
+                {/* Visual Allocation Segmented Bar */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs text-on-surface-variant">
+                    <span className="font-medium">Total Cap-Table Allocation ({selectedSh.year})</span>
+                    <span className="font-mono font-medium">
+                      {(selectedSh.promotersPct + selectedSh.institutionsPct + selectedSh.retailPublicPct + selectedSh.esopOthersPct).toFixed(1)}%
+                    </span>
+                  </div>
+                  <div
+                    className="flex h-3 w-full overflow-hidden rounded-full bg-surface-container"
+                    title={`Promoters: ${selectedSh.promotersPct}%, Institutions: ${selectedSh.institutionsPct}%, Retail: ${selectedSh.retailPublicPct}%, ESOP: ${selectedSh.esopOthersPct}%`}
+                  >
+                    <div
+                      style={{ width: `${selectedSh.promotersPct}%` }}
+                      className="bg-[#0F4A3D] transition-all duration-300"
+                    />
+                    <div
+                      style={{ width: `${selectedSh.institutionsPct}%` }}
+                      className="bg-[#2563EB] transition-all duration-300"
+                    />
+                    <div
+                      style={{ width: `${selectedSh.retailPublicPct}%` }}
+                      className="bg-[#D97706] transition-all duration-300"
+                    />
+                    <div
+                      style={{ width: `${selectedSh.esopOthersPct}%` }}
+                      className="bg-[#7C3AED] transition-all duration-300"
+                    />
+                  </div>
+                </div>
+
+                {/* 4 Cards Breakdown */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    {
+                      label: 'Promoters & Founders',
+                      val: `${selectedSh.promotersPct}%`,
+                      color: 'bg-[#0F4A3D]',
+                      desc: 'Founders & promoter entities',
+                    },
+                    {
+                      label: 'Institutional / VCs',
+                      val: `${selectedSh.institutionsPct}%`,
+                      color: 'bg-[#2563EB]',
+                      desc: 'Foreign & domestic institutional VCs',
+                    },
+                    {
+                      label: 'Public & Retail',
+                      val: `${selectedSh.retailPublicPct}%`,
+                      color: 'bg-[#D97706]',
+                      desc: 'HNIs, angel investors & public',
+                    },
+                    {
+                      label: 'ESOP Pool & Others',
+                      val: `${selectedSh.esopOthersPct}%`,
+                      color: 'bg-[#7C3AED]',
+                      desc: 'Employee options & unallocated',
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-4 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
+                        <p className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant">
+                          {item.label}
+                        </p>
+                      </div>
+                      <p className="mt-2 font-data-md text-data-md text-on-surface font-mono font-semibold">
+                        {item.val}
+                      </p>
+                      <p className="mt-1 text-[11px] text-on-surface-variant">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {selectedSh.notes ? (
+                  <div className="rounded-lg bg-surface-container-lowest/60 border border-outline-variant/30 px-3.5 py-2 text-xs text-on-surface-variant flex items-center gap-2">
+                    <span className="font-medium text-on-surface">Filing Reference:</span>
+                    <span>{selectedSh.notes}</span>
+                  </div>
+                ) : null}
+
+                {/* Multi-year comparison table if more than 1 year available */}
+                {shareholdings.length > 1 ? (
+                  <div className="mt-6 overflow-x-auto">
+                    <table className="w-full min-w-[32rem] text-left text-sm">
+                      <caption className="sr-only">Year-wise shareholding pattern</caption>
+                      <thead>
+                        <tr className="border-b border-outline-variant/40">
+                          {['Year', 'Promoters', 'Institutions (VC/FII)', 'Public & Retail', 'ESOP & Others', 'Notes'].map((h) => (
+                            <th
+                              key={h}
+                              className="px-3 py-2 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant"
+                            >
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {shareholdings.map((row, i) => (
+                          <tr
+                            key={row.year}
+                            className={`border-b border-outline-variant/30 ${
+                              i === shYearIndex ? 'bg-primary-container/10' : ''
+                            }`}
+                          >
+                            <td className="px-3 py-3 font-medium">{row.year}</td>
+                            <td className="px-3 py-3 font-mono font-medium text-[#0F4A3D]">{row.promotersPct}%</td>
+                            <td className="px-3 py-3 font-mono font-medium text-[#2563EB]">{row.institutionsPct}%</td>
+                            <td className="px-3 py-3 font-mono font-medium text-[#D97706]">{row.retailPublicPct}%</td>
+                            <td className="px-3 py-3 font-mono font-medium text-[#7C3AED]">{row.esopOthersPct}%</td>
+                            <td className="px-3 py-3 text-xs text-on-surface-variant">{row.notes || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
 
           {(stock.documents ?? []).length ? (
             <section className="elevation-widget rounded-xl p-6">

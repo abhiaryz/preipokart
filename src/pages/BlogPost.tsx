@@ -1,5 +1,8 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from '@phosphor-icons/react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeSanitize from 'rehype-sanitize';
 import { BlogAuthor, BlogPublishMeta } from '../components/BlogMeta';
 import { QueryStatus } from '../components/ui';
 import { api } from '../api';
@@ -54,16 +57,56 @@ export default function BlogPost() {
                   <img src={post.cover} alt="" className="mt-8 h-56 w-full rounded-xl object-cover sm:h-80" />
                 ) : null}
 
-                <div className="mt-8 max-w-[65ch] space-y-4 text-base leading-relaxed text-on-surface-variant">
-                  {(post.body ?? []).map((paragraph, index) => (
-                    <p key={`${index}-${paragraph.slice(0, 24)}`}>
-                      {paragraph}
-                      {index === 0 && post.inlineImage ? (
-                        <img src={post.inlineImage} alt="" className="my-6 h-48 w-full rounded-xl object-cover sm:h-64" />
-                      ) : null}
-                    </p>
-                  ))}
-                </div>
+                {post.bodyMarkdown?.trim() ? (
+                  <div className="blog-markdown mt-8 max-w-[65ch] text-base leading-relaxed text-on-surface-variant">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeSanitize]}
+                      components={{
+                        img: ({ alt, src }) => (
+                          <img
+                            src={src}
+                            alt={alt ?? ''}
+                            loading="lazy"
+                            className="my-6 h-auto max-h-[28rem] w-full rounded-xl object-cover"
+                          />
+                        ),
+                        a: ({ href, children }) => (
+                          <a
+                            href={href}
+                            className="text-primary underline-offset-4 hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {children}
+                          </a>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="mt-8 font-headline-sm text-xl text-on-surface">{children}</h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="mt-6 font-headline-sm text-lg text-on-surface">{children}</h3>
+                        ),
+                        p: ({ children }) => <p className="mt-4 first:mt-0">{children}</p>,
+                        ul: ({ children }) => <ul className="mt-4 list-disc space-y-2 pl-5">{children}</ul>,
+                        ol: ({ children }) => <ol className="mt-4 list-decimal space-y-2 pl-5">{children}</ol>,
+                      }}
+                    >
+                      {post.bodyMarkdown}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="mt-8 max-w-[65ch] space-y-4 text-base leading-relaxed text-on-surface-variant">
+                    {(post.body ?? []).map((paragraph, index) => (
+                      <p key={`${index}-${paragraph.slice(0, 24)}`}>
+                        {paragraph}
+                        {index === 0 && post.inlineImage ? (
+                          <img src={post.inlineImage} alt="" className="my-6 h-48 w-full rounded-xl object-cover sm:h-64" />
+                        ) : null}
+                      </p>
+                    ))}
+                  </div>
+                )}
               </article>
 
               <aside className="md:sticky md:top-20">

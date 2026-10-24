@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   ArrowRight,
   BookOpenText,
-  Calculator,
+  // Calculator,
   ChartScatter,
   Stamp,
   ChatCircleDots,
@@ -15,18 +15,20 @@ import {
 } from '@phosphor-icons/react';
 import { BrandLogo } from './ui';
 import { GlobalNavSearch } from './GlobalNavSearch';
-import { RaiseNavMenu } from './RaiseNavMenu';
+// import { RaiseNavMenu } from './RaiseNavMenu';
 import { api } from '../api';
 import { useAuth } from '../auth';
 import { useApi } from '../hooks/useApi';
 import AppShell from './AppShell';
+import { ToolsDropdown } from './ToolsDropdown';
 import { raiseNavLinks } from '../pages/raise/raiseContent';
+import { socialLinks } from '../lib/socialLinks';
 
 const links: Array<{ label: string; to: string; icon: Icon }> = [
   { label: 'Screener', to: '/explore/screener', icon: ChartScatter },
   { label: 'IPOs', to: '/ipos', icon: RocketLaunch },
   { label: 'Blog / News', to: '/blog', icon: BookOpenText },
-  { label: 'ROI calculator', to: '/roi-calculator', icon: Calculator },
+  // { label: 'ROI calculator', to: '/roi-calculator', icon: Calculator },
   { label: 'Stamp duty', to: '/stamp-duty', icon: Stamp },
   { label: 'FAQ', to: '/faq', icon: ChatCircleDots },
   { label: 'Contact us', to: '/contact', icon: PaperPlaneTilt },
@@ -55,23 +57,31 @@ function NavIconLink({
 
 const headerLinks = links.filter((link) => link.to !== '/stamp-duty');
 
+const homeNotices = [
+  'An information platform for unlisted & pre-IPO shares',
+  'Not a SEBI-recognised stock exchange or trading platform',
+  'All prices are indicative',
+];
+
 export function SiteHeader() {
+  const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const screenerActive = location.pathname.startsWith('/explore') || location.pathname.startsWith('/stocks');
   const blogActive = location.pathname.startsWith('/blog');
   const iposActive = location.pathname.startsWith('/ipos');
-  const roiActive = location.pathname.startsWith('/roi-calculator');
+  // const roiActive = location.pathname.startsWith('/roi-calculator');
   const stampActive = location.pathname.startsWith('/stamp-duty');
   const faqActive = location.pathname.startsWith('/faq');
   const contactActive = location.pathname.startsWith('/contact');
+  const isHome = location.pathname === '/';
 
   const navClass = (to: string) => {
     const active =
       (to === '/explore/screener' && screenerActive) ||
       (to === '/blog' && blogActive) ||
       (to === '/ipos' && iposActive) ||
-      (to === '/roi-calculator' && roiActive) ||
+      // (to === '/roi-calculator' && roiActive) ||
       (to === '/stamp-duty' && stampActive) ||
       (to === '/faq' && faqActive) ||
       (to === '/contact' && contactActive);
@@ -80,6 +90,17 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-nav border-b border-outline-variant/40 bg-canvas/90 backdrop-blur-xl">
+      {isHome ? (
+        <div className="bg-[#0F4A3D] text-white">
+          <ul className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-center gap-x-1 gap-y-0.5 px-4 py-1 text-center text-[11px] leading-snug sm:px-6 lg:px-8">
+            {homeNotices.map((text) => (
+              <li key={text} className="inline before:mx-1.5 before:text-white/45 before:content-['·'] first:before:content-none">
+                {text}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex min-h-11 shrink-0 items-center rounded-lg" aria-label="Preipokart home">
           <BrandLogo />
@@ -91,20 +112,29 @@ export function SiteHeader() {
           {headerLinks.slice(0, 2).map(({ label, to, icon }) => (
             <NavIconLink key={to} to={to} label={label} icon={icon} className={navClass(to)} />
           ))}
-          <RaiseNavMenu />
+          <ToolsDropdown variant="nav" />
           {headerLinks.slice(2).map(({ label, to, icon }) => (
             <NavIconLink key={to} to={to} label={label} icon={icon} className={navClass(to)} />
           ))}
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
-          <Link to="/login" className="btn-ghost hidden min-h-11 sm:inline-flex">
-            Log in
-          </Link>
-          <Link to="/signup" className="btn-primary hidden min-h-11 sm:inline-flex">
-            Open account
-            <ArrowRight size={16} aria-hidden="true" />
-          </Link>
+          {user ? (
+            <Link to="/dashboard" className="btn-primary min-h-11 sm:inline-flex">
+              Dashboard
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="btn-ghost hidden min-h-11 sm:inline-flex">
+                Log in
+              </Link>
+              <Link to="/signup" className="btn-primary hidden min-h-11 sm:inline-flex">
+                Open account
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </>
+          )}
           <button
             type="button"
             className="btn-ghost min-h-11 min-w-11 xl:hidden"
@@ -131,7 +161,7 @@ export function SiteHeader() {
                 onClick={() => setMenuOpen(false)}
               />
             ))}
-            <RaiseNavMenu variant="mobile" onNavigate={() => setMenuOpen(false)} />
+            {/* <RaiseNavMenu variant="mobile" onNavigate={() => setMenuOpen(false)} /> */}
             {links.slice(2).map(({ label, to, icon }) => (
               <NavIconLink
                 key={to}
@@ -193,8 +223,25 @@ export function SiteFooter() {
             <BrandLogo />
           </Link>
           <p className="mt-3 max-w-[36ch] text-sm text-on-surface-variant">
-            Dummy request book for unlisted shares in India. Not a live exchange. Unlisted equity is risky and may be illiquid.
+            Research, request, and track unlisted trades. Unlisted equity is risky and may be illiquid.
           </p>
+          <nav className="mt-5" aria-label="Social media">
+            <ul className="flex flex-wrap gap-2">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <li key={href}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant/45 bg-surface-container-low/60 text-on-surface-variant transition duration-200 hover:border-primary-container/35 hover:bg-surface-container-low hover:text-primary"
+                    aria-label={label}
+                  >
+                    <Icon size={20} weight="fill" aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
           <PreferredSourceButton />
         </div>
 
@@ -237,6 +284,21 @@ export function SiteFooter() {
               <li>
                 <Link to="/stamp-duty" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
                   Stamp duty
+                </Link>
+              </li>
+              <li>
+                <Link to="/share-budget" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
+                  Shares for a budget
+                </Link>
+              </li>
+              <li>
+                <Link to="/break-even" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
+                  Break-even price
+                </Link>
+              </li>
+              <li>
+                <Link to="/capital-gains" className="text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
+                  Capital gains
                 </Link>
               </li>
               <li>
