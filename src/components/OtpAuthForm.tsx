@@ -6,6 +6,8 @@ import { api, errorMessage } from '../api';
 import { safeNextPath, useAuth } from '../auth';
 import posthog, { isPostHogConfigured } from '../posthog';
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 type Channel = 'email' | 'mobile';
 type Step = 'identify' | 'otp';
 type AuthMethod = 'password' | 'otp';
@@ -42,6 +44,8 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const [resendIn, setResendIn] = useState(0);
   const errorRef = useRef<HTMLDivElement>(null);
   const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const googleBtnRef = useRef<HTMLDivElement>(null);
+  const handleGoogleCredentialRef = useRef<(credential: string) => void>(() => {});
 
   const isSignup = mode === 'signup';
   const fieldPrefix = mode;
@@ -73,6 +77,55 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
     if (isPostHogConfigured) posthog.capture('authentication_completed', { mode, method });
     navigate(next);
   };
+
+  handleGoogleCredentialRef.current = async (credential: string) => {
+    setError('');
+    setBusy(true);
+    try {
+      const session = await api.googleOauth(credential);
+      finishAuth(session, 'google');
+    } catch (err) {
+      showError(errorMessage(err, 'Google sign-in could not be completed. Please try again.'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || step !== 'identify') return undefined;
+    const renderGoogleButton = () => {
+      const g = window.google;
+      if (!g?.accounts?.id || !googleBtnRef.current) return;
+      g.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (response: { credential: string }) =>
+          handleGoogleCredentialRef.current(response.credential),
+      });
+      googleBtnRef.current.innerHTML = '';
+      g.accounts.id.renderButton(googleBtnRef.current, {
+        theme: 'outline',
+        size: 'large',
+        text: isSignup ? 'signup_with' : 'signin_with',
+        shape: 'rectangular',
+        logo_alignment: 'center',
+      });
+    };
+    if (window.google?.accounts?.id) {
+      renderGoogleButton();
+      return undefined;
+    }
+    let script = document.getElementById('google-gsi') as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.id = 'google-gsi';
+      document.head.appendChild(script);
+    }
+    script.addEventListener('load', renderGoogleButton);
+    return () => script?.removeEventListener('load', renderGoogleButton);
+  }, [step, isSignup]);
 
   const sendOtp = async (resend = false) => {
     setError('');
@@ -215,15 +268,19 @@ export function OtpAuthForm({ mode }: { mode: 'login' | 'signup' }) {
 
       {step === 'identify' ? (
         <div className="flex flex-col gap-5">
-          <button
-            type="button"
-            className="btn-secondary min-h-12 w-full cursor-pointer"
-            disabled={busy}
-            onClick={() => showError('Google sign-in is not configured in this environment.')}
-          >
-            <GoogleLogo size={18} weight="bold" aria-hidden="true" />
-            Continue with Google
-          </button>
+          {GOOGLE_CLIENT_ID ? (
+            <div ref={googleBtnRef} className="flex min-h-12 w-full items-center justify-center" />
+          ) : (
+            <button
+              type="button"
+              className="btn-secondary min-h-12 w-full cursor-pointer"
+              disabled={busy}
+              onClick={() => showError('Google sign-in is not configured in this environment.')}
+            >
+              <GoogleLogo size={18} weight="bold" aria-hidden="true" />
+              Continue with Google
+            </button>
+          )}
 
           <div className="grid grid-cols-2 gap-2" role="group" aria-label="Sign-in method">
             {(
